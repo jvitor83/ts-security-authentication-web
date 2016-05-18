@@ -110,14 +110,39 @@ export class AuthenticationInitializer
         this.oidcTokenManager = new OidcTokenManager(config);
     }
     
-    public Callback()
+    public ProcessTokenCallback()
     {
         this.oidcTokenManager.processTokenCallbackAsync();
+        
+        this.GenerateTokens();
     }
     
     public RenewTokenSilent()
     {
         this.oidcTokenManager.renewTokenSilentAsync();
+        
+        this.GenerateTokens();
+    }
+    
+    public LoginAndProcessToken(openOnPopUp?: boolean)
+    {
+        let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
+        
+        //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
+        if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
+        {
+            this.ProcessTokenCallback();
+        }
+        //if the actual page is the 'silent_redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'
+        else if (location.href.substring(0, this.AuthenticationManagerSettings.silent_redirect_uri.length) === this.AuthenticationManagerSettings.silent_redirect_uri)
+        {
+            this.RenewTokenSilent();
+        }
+        //if the actual page is the 'client_url', then i consider to make the 'login'
+        else if(location.href.substring(0, this.AuthenticationManagerSettings.client_url.length) === this.AuthenticationManagerSettings.client_url)
+        {
+            this.Login(shouldOpenOnPopUp);
+        }
     }
     
     public Login(openOnPopUp?: boolean)
@@ -125,47 +150,27 @@ export class AuthenticationInitializer
         //TODO: Treat when in mobile browser to not support popup
         let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
         
-        //if(location.href.indexOf('silentrefreshframe=true') === -1)
-        
-        
-        if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
+        if (shouldOpenOnPopUp)
         {
-            this.Callback();
+            this.oidcTokenManager.openPopupForTokenAsync();
         }
-        else if (location.href.substring(0, this.AuthenticationManagerSettings.silent_redirect_uri.length) === this.AuthenticationManagerSettings.silent_redirect_uri)
+        else
         {
-            this.RenewTokenSilent();
+            this.oidcTokenManager.redirectForToken();
         }
-        else if(location.href.substring(0, this.AuthenticationManagerSettings.client_url.length) === this.AuthenticationManagerSettings.client_url)
-        {
-            if (shouldOpenOnPopUp)
-            {
-                this.oidcTokenManager.openPopupForTokenAsync();
-            }
-            else
-            {
-                this.oidcTokenManager.redirectForToken();
-            }
-        }
-        // else
-        // {
-        //     this.oidcTokenManager.processTokenPopup();
-        // }
-        
-        this.GenerateTokens();
     }
 
-    public AccessToken: any = null;  
-    public IdentityToken: any = null;
-    public Profile: any = null;
+    public AccessTokenContent: any = null;  
+    public IdentityTokenContent: any = null;
+    public ProfileContent: any = null;
 
     //TODO: Split the parser to another project (package - ts-security-tokens?)
     //Include refactory at the ts-security-identity also
     protected GenerateTokens()
     {
-        this.AccessToken = JSON.parse(atob(this.oidcTokenManager.access_token.split('.')[1]));
-        this.IdentityToken = JSON.parse(atob(this.oidcTokenManager.id_token.split('.')[1]));
-        this.Profile = this.oidcTokenManager.profile;
+        this.AccessTokenContent = JSON.parse(atob(this.oidcTokenManager.access_token.split('.')[1]));
+        this.IdentityTokenContent = JSON.parse(atob(this.oidcTokenManager.id_token.split('.')[1]));
+        this.ProfileContent = this.oidcTokenManager.profile;
     }
     
 
