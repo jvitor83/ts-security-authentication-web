@@ -12,11 +12,12 @@ export declare class AuthenticationInitializer {
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
     Init(authenticationSettings: IAuthenticationSettings): void;
-    Callback(): void;
+    ProcessTokenCallback(): void;
     RenewTokenSilent(): void;
+    LoginAndProcessToken(openOnPopUp?: boolean): void;
     Login(openOnPopUp?: boolean): void;
-    AccessToken: any;
-    IdentityToken: any;
-    Profile: any;
+    AccessTokenContent: any;
+    IdentityTokenContent: any;
+    ProfileContent: any;
     protected GenerateTokens(): void;
 }

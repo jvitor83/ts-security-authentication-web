@@ -16,7 +16,7 @@ import {IAuthenticationSettings} from '../src/IAuthenticationSettings';
         };
         
         AuthenticationInitializer.Current.Init(config);
-        AuthenticationInitializer.Current.Login();
+        AuthenticationInitializer.Current.LoginAndProcessToken();
         // if(location.href.indexOf('callback=') === -1)
         // {
         //     AuthenticationInitializer.Current.Login();
