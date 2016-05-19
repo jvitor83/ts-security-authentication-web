@@ -16,6 +16,7 @@ export declare class AuthenticationInitializer {
     RenewTokenSilent(): void;
     LoginAndProcessToken(openOnPopUp?: boolean): void;
     Login(openOnPopUp?: boolean): void;
+    IsAuthenticated(): boolean;
     AccessTokenContent: any;
     IdentityTokenContent: any;
     ProfileContent: any;

@@ -160,6 +160,18 @@ export class AuthenticationInitializer
         }
     }
 
+    public IsAuthenticated() :boolean
+    {
+        if(this.AccessTokenContent == null)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
     public AccessTokenContent: any = null;  
     public IdentityTokenContent: any = null;
     public ProfileContent: any = null;
