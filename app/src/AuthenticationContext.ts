@@ -65,7 +65,7 @@ export class AuthenticationContext
         
         //Set default values if not informed
         authenticationSettings.client_url = authenticationSettings.client_url || location.href; //Self uri
-        authenticationSettings.scopes = authenticationSettings.scopes || 'openid profile email offline_access'; //OpenId default scopes
+        authenticationSettings.scope = authenticationSettings.scope || 'openid profile email offline_access'; //OpenId default scopes
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
         authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
@@ -79,7 +79,7 @@ export class AuthenticationContext
             client_url: authenticationSettings.client_url,
             open_on_popup: authenticationSettings.open_on_popup,
             response_type: authenticationSettings.response_type,
-            scopes: authenticationSettings.scopes,
+            scope: authenticationSettings.scope,
             
             redirect_uri : authenticationSettings.client_url + '?callback=true',
             silent_redirect_uri: authenticationSettings.client_url + "?silentrefreshframe=true",
