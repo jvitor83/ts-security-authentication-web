@@ -8,32 +8,53 @@ import 'oidc-token-manager';
 /**
  * AuthenticationInitializer
  */
-export class AuthenticationInitializer 
+export class AuthenticationContextInitializer 
 {
     
-    private static _current: AuthenticationInitializer = null;
+    private static _current: AuthenticationContextInitializer = null;
 
-    public static get Current(): AuthenticationInitializer 
+    public static get Current(): AuthenticationContextInitializer 
     {
-        if(AuthenticationInitializer._current === null)
+        if(AuthenticationContextInitializer._current === null)
         {
-            AuthenticationInitializer._current =  new AuthenticationInitializer();
+            AuthenticationContextInitializer._current =  new AuthenticationContextInitializer();
         }
-        return AuthenticationInitializer._current;
+        return AuthenticationContextInitializer._current;
     }
+    
     
     public static Reset()
     {
-        AuthenticationInitializer._current = null;
+        AuthenticationContextInitializer._current = null;
     }
 
     private oidcTokenManager: Oidc.OidcTokenManager;
         
-    constructor() {
-        
+    constructor() 
+    {
+        let authenticationSettingsLoadedFromStorage = this.AuthenticationManagerSettings;
+        if(authenticationSettingsLoadedFromStorage != null)
+        {
+            this.oidcTokenManager = new OidcTokenManager( authenticationSettingsLoadedFromStorage );
+        }
     }
     
-    protected AuthenticationManagerSettings: IAuthenticationManagerSettings = null;
+    protected get AuthenticationManagerSettings(): IAuthenticationManagerSettings 
+    {
+        let authenticationSettingsFromLocalStorage: IAuthenticationManagerSettings = null;
+        let authenticationSettingsFromLocalStorageStringify = localStorage.getItem('AuthenticationManagerSettings');
+        if(authenticationSettingsFromLocalStorageStringify != null)
+        {
+            authenticationSettingsFromLocalStorage = JSON.parse(authenticationSettingsFromLocalStorageStringify);
+        }
+        return authenticationSettingsFromLocalStorage;
+    }
+    
+    protected set AuthenticationManagerSettings(value: IAuthenticationManagerSettings)
+    {
+        localStorage.setItem('AuthenticationManagerSettings', JSON.stringify(this.AuthenticationManagerSettings));
+    }
+    
     
     public Init(authenticationSettings: IAuthenticationSettings) 
     {
@@ -49,10 +70,6 @@ export class AuthenticationInitializer
         authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
         
-        let localStorage_redirect_uri = localStorage.getItem('redirect_uri');
-        let localStorage_silent_redirect_uri = localStorage.getItem('silent_redirect_uri');
-        let localStorage_post_logout_redirect_uri = localStorage.getItem('post_logout_redirect_uri');
-        
         
         //Convert to the more complete IAuthenticationManagerSettings
         this.AuthenticationManagerSettings = 
@@ -64,19 +81,23 @@ export class AuthenticationInitializer
             response_type: authenticationSettings.response_type,
             scopes: authenticationSettings.scopes,
             
-            redirect_uri : localStorage_redirect_uri || authenticationSettings.client_url + '?callback=true',
-            silent_redirect_uri: localStorage_silent_redirect_uri || authenticationSettings.client_url + "?silentrefreshframe=true",
-            post_logout_redirect_uri: localStorage_post_logout_redirect_uri || authenticationSettings.client_url + "index.html",
+            redirect_uri : authenticationSettings.client_url + '?callback=true',
+            silent_redirect_uri: authenticationSettings.client_url + "?silentrefreshframe=true",
+            post_logout_redirect_uri: authenticationSettings.client_url,
             
             authorization_url : authenticationSettings.authority + "/connect/authorize",
             token_url : authenticationSettings.authority + "/connect/token",
-            userinfo_url: authenticationSettings.authority + "/connect/userinfo"
+            userinfo_url: authenticationSettings.authority + "/connect/userinfo",
+            
+            load_user_profile: true,
+            silent_renew: true,
         };
         
         
-        localStorage.setItem('redirect_uri', this.AuthenticationManagerSettings.redirect_uri);
-        localStorage.setItem('silent_redirect_uri', this.AuthenticationManagerSettings.silent_redirect_uri);
-        localStorage.setItem('post_logout_redirect_uri', this.AuthenticationManagerSettings.post_logout_redirect_uri);
+         
+        // //TODO: Class to write and read
+        // localStorage.setItem('AuthenticationManagerSettings', JSON.stringify(this.AuthenticationManagerSettings));
+        
         
         //TODO: se nao foi informado um redirect_uri, monta-se com base em uma convenção (multi plataform aware)
         // let url = window.location.href.split("#")[0];
@@ -85,29 +106,29 @@ export class AuthenticationInitializer
         // enderecoCallback = enderecoCallback.substr(0, indexBarra) + '/callback.html';
         
         
-        let config = {
-            authority: this.AuthenticationManagerSettings.authority,
-            client_id: this.AuthenticationManagerSettings.client_id,
-            load_user_profile: true,
-            scope: this.AuthenticationManagerSettings.scopes,
-            response_type: this.AuthenticationManagerSettings.response_type,
+        // let config = {
+        //     authority: this.AuthenticationManagerSettings.authority,
+        //     client_id: this.AuthenticationManagerSettings.client_id,
+        //     load_user_profile: true,
+        //     scope: this.AuthenticationManagerSettings.scopes,
+        //     response_type: this.AuthenticationManagerSettings.response_type,
             
-            client_url: this.AuthenticationManagerSettings.client_url,
+        //     client_url: this.AuthenticationManagerSettings.client_url,
             
-            redirect_uri: this.AuthenticationManagerSettings.redirect_uri,	
-            post_logout_redirect_uri: this.AuthenticationManagerSettings.post_logout_redirect_uri,
-            silent_redirect_uri: this.AuthenticationManagerSettings.silent_redirect_uri,
-            silent_renew: true,
+        //     redirect_uri: this.AuthenticationManagerSettings.redirect_uri,	
+        //     post_logout_redirect_uri: this.AuthenticationManagerSettings.post_logout_redirect_uri,
+        //     silent_redirect_uri: this.AuthenticationManagerSettings.silent_redirect_uri,
+        //     silent_renew: true,
             
-            authorization_endpoint: this.AuthenticationManagerSettings.authority + "/connect/authorize", 
-            userinfo_endpoint: this.AuthenticationManagerSettings.authority + "/connect/userinfo",
+        //     authorization_endpoint: this.AuthenticationManagerSettings.authority + "/connect/authorize", 
+        //     userinfo_endpoint: this.AuthenticationManagerSettings.authority + "/connect/userinfo",
             
-            authorization_url : this.AuthenticationManagerSettings.authority + "/connect/authorize",
-            token_url : this.AuthenticationManagerSettings.authority + "/connect/token",
-            userinfo_url: this.AuthenticationManagerSettings.authority + "/connect/userinfo"
-        };
+        //     authorization_url : this.AuthenticationManagerSettings.authority + "/connect/authorize",
+        //     token_url : this.AuthenticationManagerSettings.authority + "/connect/token",
+        //     userinfo_url: this.AuthenticationManagerSettings.authority + "/connect/userinfo"
+        // };
         
-        this.oidcTokenManager = new OidcTokenManager(config);
+        this.oidcTokenManager = new OidcTokenManager(this.AuthenticationManagerSettings);
     }
     
     public ProcessTokenCallback()
@@ -160,7 +181,7 @@ export class AuthenticationInitializer
         }
     }
 
-    public IsAuthenticated() :boolean
+    public get IsAuthenticated() :boolean
     {
         if(this.AccessTokenContent == null)
         {

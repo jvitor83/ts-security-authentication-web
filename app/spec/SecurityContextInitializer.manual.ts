@@ -1,6 +1,6 @@
 /// <reference path='../../typings/main.d.ts' />
 
-import {AuthenticationInitializer} from '../src/AuthenticationInitializer';
+import {AuthenticationContextInitializer} from '../src/AuthenticationContextInitializer';
 import {IAuthenticationSettings} from '../src/IAuthenticationSettings';
 
 
@@ -15,8 +15,8 @@ import {IAuthenticationSettings} from '../src/IAuthenticationSettings';
             open_on_popup: false
         };
         
-        AuthenticationInitializer.Current.Init(config);
-        AuthenticationInitializer.Current.LoginAndProcessToken();
+        AuthenticationContextInitializer.Current.Init(config);
+        AuthenticationContextInitializer.Current.LoginAndProcessToken();
         // if(location.href.indexOf('callback=') === -1)
         // {
         //     AuthenticationInitializer.Current.Login();
