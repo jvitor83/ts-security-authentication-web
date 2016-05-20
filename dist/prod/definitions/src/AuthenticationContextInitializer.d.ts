@@ -1,9 +1,9 @@
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import 'oidc-token-manager';
-export declare class AuthenticationInitializer {
+export declare class AuthenticationContextInitializer {
     private static _current;
-    static Current: AuthenticationInitializer;
+    static Current: AuthenticationContextInitializer;
     static Reset(): void;
     private oidcTokenManager;
     constructor();
@@ -13,7 +13,7 @@ export declare class AuthenticationInitializer {
     RenewTokenSilent(): void;
     LoginAndProcessToken(openOnPopUp?: boolean): void;
     Login(openOnPopUp?: boolean): void;
-    IsAuthenticated(): boolean;
+    IsAuthenticated: boolean;
     AccessTokenContent: any;
     IdentityTokenContent: any;
     ProfileContent: any;
