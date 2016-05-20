@@ -16,6 +16,7 @@ export declare class AuthenticationContext {
     Init(authenticationSettings: IAuthenticationSettings, force?: boolean): void;
     ProcessTokenCallback(): void;
     RenewTokenSilent(): void;
+    protected RedirectToInitialPage(): void;
     protected ValidateInitialization(): void;
     LoginAndProcessToken(openOnPopUp?: boolean): void;
     Login(openOnPopUp?: boolean): void;

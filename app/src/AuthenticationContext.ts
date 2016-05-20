@@ -118,6 +118,7 @@ export class AuthenticationContext
         
         this.oidcTokenManager.processTokenCallbackAsync();
         
+        this.RedirectToInitialPage();
     }
     
     public RenewTokenSilent()
@@ -126,7 +127,14 @@ export class AuthenticationContext
         
         this.oidcTokenManager.renewTokenSilentAsync();
         
+        this.RedirectToInitialPage();
     }
+    
+    protected RedirectToInitialPage()
+    {
+        location.assign(this.AuthenticationManagerSettings.client_url);
+    }
+
     
     protected ValidateInitialization()
     {
