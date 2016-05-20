@@ -163,24 +163,34 @@ export class AuthenticationContext
         //if the actual page is the 'client_url', then i consider to make the 'login'
         else if(location.href.substring(0, this.AuthenticationManagerSettings.client_url.length) === this.AuthenticationManagerSettings.client_url)
         {
-            this.Login(shouldOpenOnPopUp);
+            if(this.IsAuthenticated === false)
+            {
+                this.Login(shouldOpenOnPopUp);
+            }
         }
     }
     
     public Login(openOnPopUp?: boolean)
     {
-        this.ValidateInitialization();
-        
-        //TODO: Treat when in mobile browser to not support popup
-        let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
-        
-        if (shouldOpenOnPopUp)
+        if(this.IsAuthenticated === false)
         {
-            this.oidcTokenManager.openPopupForTokenAsync();
+            this.ValidateInitialization();
+            
+            //TODO: Treat when in mobile browser to not support popup
+            let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
+            
+            if (shouldOpenOnPopUp)
+            {
+                this.oidcTokenManager.openPopupForTokenAsync();
+            }
+            else
+            {
+                this.oidcTokenManager.redirectForToken();
+            }
         }
         else
         {
-            this.oidcTokenManager.redirectForToken();
+            console.warn('Already authenticated');
         }
     }
 
