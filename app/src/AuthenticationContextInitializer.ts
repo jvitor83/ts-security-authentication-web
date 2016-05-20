@@ -183,6 +183,8 @@ export class AuthenticationContextInitializer
 
     public get IsAuthenticated() :boolean
     {
+        this.GenerateTokens();
+        
         if(this.AccessTokenContent == null)
         {
             return false;
@@ -201,9 +203,35 @@ export class AuthenticationContextInitializer
     //Include refactory at the ts-security-identity also
     protected GenerateTokens()
     {
-        this.AccessTokenContent = JSON.parse(atob(this.oidcTokenManager.access_token.split('.')[1]));
-        this.IdentityTokenContent = JSON.parse(atob(this.oidcTokenManager.id_token.split('.')[1]));
-        this.ProfileContent = this.oidcTokenManager.profile;
+        if(this.oidcTokenManager != null)
+        {
+            if(this.oidcTokenManager.access_token != null)
+            {
+                let accessTokenContent = this.oidcTokenManager.access_token.split('.')[1];
+                if(accessTokenContent != null)
+                {
+                    this.AccessTokenContent = JSON.parse(atob(accessTokenContent));
+                }
+            }
+            
+            if(this.oidcTokenManager.id_token != null)
+            {
+                let identityTokenContent = this.oidcTokenManager.id_token.split('.')[1];
+                if(identityTokenContent != null)
+                {
+                    this.AccessTokenContent = JSON.parse(atob(identityTokenContent));
+                }
+            }
+            
+            if(this.oidcTokenManager.profile != null)
+            {
+                this.ProfileContent = this.oidcTokenManager.profile;
+            }
+        }
+        
+        // this.AccessTokenContent = JSON.parse(atob(this.oidcTokenManager.access_token.split('.')[1]));
+        // this.IdentityTokenContent = JSON.parse(atob(this.oidcTokenManager.id_token.split('.')[1]));
+        // this.ProfileContent = this.oidcTokenManager.profile;
     }
     
 
