@@ -52,7 +52,7 @@ export class AuthenticationContext
     
     protected set AuthenticationManagerSettings(value: IAuthenticationManagerSettings)
     {
-        localStorage.setItem('AuthenticationManagerSettings', JSON.stringify(this.AuthenticationManagerSettings));
+        localStorage.setItem('AuthenticationManagerSettings', JSON.stringify(value));
     }
     
     
@@ -137,7 +137,6 @@ export class AuthenticationContext
         
         this.oidcTokenManager.processTokenCallbackAsync();
         
-        this.GenerateTokens();
     }
     
     public RenewTokenSilent()
@@ -146,7 +145,6 @@ export class AuthenticationContext
         
         this.oidcTokenManager.renewTokenSilentAsync();
         
-        this.GenerateTokens();
     }
     
     protected ValidateInitialization()
@@ -199,8 +197,6 @@ export class AuthenticationContext
 
     public get IsAuthenticated() :boolean
     {
-        this.GenerateTokens();
-        
         if(this.AccessTokenContent == null)
         {
             return false;
@@ -211,13 +207,7 @@ export class AuthenticationContext
         }
     }
 
-    public AccessTokenContent: any = null;  
-    public IdentityTokenContent: any = null;
-    public ProfileContent: any = null;
-
-    //TODO: Split the parser to another project (package - ts-security-tokens?)
-    //Include refactory at the ts-security-identity also
-    protected GenerateTokens()
+    public get AccessTokenContent(): any 
     {
         if(this.oidcTokenManager != null)
         {
@@ -226,29 +216,59 @@ export class AuthenticationContext
                 let accessTokenContent = this.oidcTokenManager.access_token.split('.')[1];
                 if(accessTokenContent != null)
                 {
-                    this.AccessTokenContent = JSON.parse(atob(accessTokenContent));
+                    let valor =  JSON.parse(atob(accessTokenContent));
+                    return valor;
                 }
             }
-            
+        }
+        return null;
+    }
+    
+    public get IdentityTokenContent(): any
+    {
+        if(this.oidcTokenManager != null)
+        {
             if(this.oidcTokenManager.id_token != null)
             {
                 let identityTokenContent = this.oidcTokenManager.id_token.split('.')[1];
                 if(identityTokenContent != null)
                 {
-                    this.AccessTokenContent = JSON.parse(atob(identityTokenContent));
+                    let valor = JSON.parse(atob(identityTokenContent));
+                    return valor;
                 }
             }
-            
+        }
+    }
+    
+    public get ProfileContent(): any
+    {
+        if(this.oidcTokenManager != null)
+        {
             if(this.oidcTokenManager.profile != null)
             {
-                this.ProfileContent = this.oidcTokenManager.profile;
+                let valor = this.oidcTokenManager.profile;
+                return valor;
             }
         }
-        
-        // this.AccessTokenContent = JSON.parse(atob(this.oidcTokenManager.access_token.split('.')[1]));
-        // this.IdentityTokenContent = JSON.parse(atob(this.oidcTokenManager.id_token.split('.')[1]));
-        // this.ProfileContent = this.oidcTokenManager.profile;
+        return null;
     }
+
+    // //TODO: Split the parser to another project (package - ts-security-tokens?)
+    // //Include refactory at the ts-security-identity also
+    // protected GenerateTokens()
+    // {
+
+            
+    //         if(this.oidcTokenManager.profile != null)
+    //         {
+    //             this.ProfileContent = this.oidcTokenManager.profile;
+    //         }
+    //     }
+        
+    //     // this.AccessTokenContent = JSON.parse(atob(this.oidcTokenManager.access_token.split('.')[1]));
+    //     // this.IdentityTokenContent = JSON.parse(atob(this.oidcTokenManager.id_token.split('.')[1]));
+    //     // this.ProfileContent = this.oidcTokenManager.profile;
+    // }
     
 
 }

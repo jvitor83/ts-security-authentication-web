@@ -21,5 +21,4 @@ export declare class AuthenticationContext {
     AccessTokenContent: any;
     IdentityTokenContent: any;
     ProfileContent: any;
-    protected GenerateTokens(): void;
 }
