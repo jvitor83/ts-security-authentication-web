@@ -1,12 +1,9 @@
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import 'oidc-token-manager';
-/**
- * AuthenticationInitializer
- */
-export declare class AuthenticationContextInitializer {
+export declare class AuthenticationContext {
     private static _current;
-    static Current: AuthenticationContextInitializer;
+    static Current: AuthenticationContext;
     static Reset(): void;
     private oidcTokenManager;
     constructor();

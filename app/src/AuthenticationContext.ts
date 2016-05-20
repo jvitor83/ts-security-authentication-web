@@ -8,24 +8,24 @@ import 'oidc-token-manager';
 /**
  * AuthenticationInitializer
  */
-export class AuthenticationContextInitializer 
+export class AuthenticationContext 
 {
     
-    private static _current: AuthenticationContextInitializer = null;
+    private static _current: AuthenticationContext = null;
 
-    public static get Current(): AuthenticationContextInitializer 
+    public static get Current(): AuthenticationContext 
     {
-        if(AuthenticationContextInitializer._current === null)
+        if(AuthenticationContext._current === null)
         {
-            AuthenticationContextInitializer._current =  new AuthenticationContextInitializer();
+            AuthenticationContext._current =  new AuthenticationContext();
         }
-        return AuthenticationContextInitializer._current;
+        return AuthenticationContext._current;
     }
     
     
     public static Reset()
     {
-        AuthenticationContextInitializer._current = null;
+        AuthenticationContext._current = null;
     }
 
     private oidcTokenManager: Oidc.OidcTokenManager;
