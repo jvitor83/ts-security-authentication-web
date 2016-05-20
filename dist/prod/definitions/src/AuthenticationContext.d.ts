@@ -4,11 +4,13 @@ import 'oidc-token-manager';
 export declare class AuthenticationContext {
     private static _current;
     static Current: AuthenticationContext;
+    IsInitialized: boolean;
     static Reset(): void;
     private oidcTokenManager;
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
-    Init(authenticationSettings: IAuthenticationSettings): void;
+    protected Initialize(authenticationSettings: IAuthenticationSettings): void;
+    Init(authenticationSettings: IAuthenticationSettings, force?: boolean): void;
     ProcessTokenCallback(): void;
     RenewTokenSilent(): void;
     protected ValidateInitialization(): void;

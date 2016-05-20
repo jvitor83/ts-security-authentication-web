@@ -22,6 +22,17 @@ export class AuthenticationContext
         return AuthenticationContext._current;
     }
     
+    public get IsInitialized()
+    {
+        if(this.AuthenticationManagerSettings != null)
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     
     public static Reset()
     {
@@ -55,8 +66,7 @@ export class AuthenticationContext
         localStorage.setItem('AuthenticationManagerSettings', JSON.stringify(value));
     }
     
-    
-    public Init(authenticationSettings: IAuthenticationSettings) 
+    protected Initialize(authenticationSettings: IAuthenticationSettings)
     {
         if(authenticationSettings.authority == null || authenticationSettings.client_id == null)
         {
@@ -69,8 +79,6 @@ export class AuthenticationContext
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
         authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
-        
-        
         //Convert to the more complete IAuthenticationManagerSettings
         this.AuthenticationManagerSettings = 
         {
@@ -93,42 +101,15 @@ export class AuthenticationContext
             silent_renew: true,
         };
         
-        
-         
-        // //TODO: Class to write and read
-        // localStorage.setItem('AuthenticationManagerSettings', JSON.stringify(this.AuthenticationManagerSettings));
-        
-        
-        //TODO: se nao foi informado um redirect_uri, monta-se com base em uma convenção (multi plataform aware)
-        // let url = window.location.href.split("#")[0];
-        // let indexBarra = url.lastIndexOf('/');
-        // let enderecoCallback = url;
-        // enderecoCallback = enderecoCallback.substr(0, indexBarra) + '/callback.html';
-        
-        
-        // let config = {
-        //     authority: this.AuthenticationManagerSettings.authority,
-        //     client_id: this.AuthenticationManagerSettings.client_id,
-        //     load_user_profile: true,
-        //     scope: this.AuthenticationManagerSettings.scopes,
-        //     response_type: this.AuthenticationManagerSettings.response_type,
-            
-        //     client_url: this.AuthenticationManagerSettings.client_url,
-            
-        //     redirect_uri: this.AuthenticationManagerSettings.redirect_uri,	
-        //     post_logout_redirect_uri: this.AuthenticationManagerSettings.post_logout_redirect_uri,
-        //     silent_redirect_uri: this.AuthenticationManagerSettings.silent_redirect_uri,
-        //     silent_renew: true,
-            
-        //     authorization_endpoint: this.AuthenticationManagerSettings.authority + "/connect/authorize", 
-        //     userinfo_endpoint: this.AuthenticationManagerSettings.authority + "/connect/userinfo",
-            
-        //     authorization_url : this.AuthenticationManagerSettings.authority + "/connect/authorize",
-        //     token_url : this.AuthenticationManagerSettings.authority + "/connect/token",
-        //     userinfo_url: this.AuthenticationManagerSettings.authority + "/connect/userinfo"
-        // };
-        
         this.oidcTokenManager = new OidcTokenManager(this.AuthenticationManagerSettings);
+    }
+    
+    public Init(authenticationSettings: IAuthenticationSettings, force = false) 
+    {
+        if(this.IsInitialized === false || force === true)
+        {
+            this.Initialize(authenticationSettings);
+        }
     }
     
     public ProcessTokenCallback()
