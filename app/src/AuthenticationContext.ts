@@ -116,18 +116,29 @@ export class AuthenticationContext
     {
         this.ValidateInitialization();
         
-        this.oidcTokenManager.processTokenCallbackAsync();
-        
-        this.RedirectToInitialPage();
+        this.oidcTokenManager.processTokenCallbackAsync()
+        .then(
+            () => {
+                this.RedirectToInitialPage();
+            },
+            (error) => {
+                alert("Problem Getting Token : " + (error.message || error));
+            }
+        );
     }
     
     public RenewTokenSilent()
     {
         this.ValidateInitialization();
         
-        this.oidcTokenManager.renewTokenSilentAsync();
-        
-        this.RedirectToInitialPage();
+        this.oidcTokenManager.renewTokenSilentAsync().then(
+            () => {
+                
+            },
+            (error) => {
+                alert("Problem Getting Token : " + (error.message || error));
+            }
+        );
     }
     
     protected RedirectToInitialPage()
