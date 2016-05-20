@@ -133,6 +133,8 @@ export class AuthenticationContext
     
     public ProcessTokenCallback()
     {
+        this.ValidateInitialization();
+        
         this.oidcTokenManager.processTokenCallbackAsync();
         
         this.GenerateTokens();
@@ -140,13 +142,25 @@ export class AuthenticationContext
     
     public RenewTokenSilent()
     {
+        this.ValidateInitialization();
+        
         this.oidcTokenManager.renewTokenSilentAsync();
         
         this.GenerateTokens();
     }
     
+    protected ValidateInitialization()
+    {
+        if(this.AuthenticationManagerSettings == null)
+        {
+            throw "AuthenticationContext uninitialized!";
+        }
+    }
+    
     public LoginAndProcessToken(openOnPopUp?: boolean)
     {
+        this.ValidateInitialization();
+        
         let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
         
         //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
@@ -168,6 +182,8 @@ export class AuthenticationContext
     
     public Login(openOnPopUp?: boolean)
     {
+        this.ValidateInitialization();
+        
         //TODO: Treat when in mobile browser to not support popup
         let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
         
