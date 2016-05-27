@@ -102,6 +102,25 @@ export class AuthenticationContext
         };
         
         this.oidcTokenManager = new OidcTokenManager(this.AuthenticationManagerSettings);
+        
+        this.ProcessTokenIfNeeded();
+    }
+    
+    protected ProcessTokenIfNeeded()
+    {
+        
+        //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
+        //if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
+        if(location.href.indexOf('access_token=') > -1)
+        {
+            console.log('Processing token!');
+            this.ProcessTokenCallback();
+        }
+        // //if the actual page is the 'silent_redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'
+        // else if (location.href.substring(0, this.AuthenticationManagerSettings.silent_redirect_uri.length) === this.AuthenticationManagerSettings.silent_redirect_uri)
+        // {
+        //     this.RenewTokenSilent();
+        // }
     }
     
     public Init(authenticationSettings: IAuthenticationSettings, force = false) 
@@ -155,31 +174,40 @@ export class AuthenticationContext
         }
     }
     
-    public LoginAndProcessToken(openOnPopUp?: boolean)
-    {
-        this.ValidateInitialization();
+    
+    /**
+     * Make the login at the current URI, and process the received tokens.
+     * OBS: The Redirect URI [callback_url] (to receive the token) and Silent Refresh Frame URI [silent_redirect_uri] (to auto renew when expired) if not informed is auto generated based on the 'client_url' informed at 'Init' method with the followin strategy:
+     * `redirect_url = client_url + '?callback=true'`
+     * `silent_redirect_uri = client_url + '?silentrefreshframe=true'` 
+     * 
+     * @param {boolean} [openOnPopUp] (description)
+     */
+    // public LoginAndProcessToken(openOnPopUp?: boolean)
+    // {
+    //     this.ValidateInitialization();
         
-        let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
+    //     let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
         
-        //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
-        if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
-        {
-            this.ProcessTokenCallback();
-        }
-        //if the actual page is the 'silent_redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'
-        else if (location.href.substring(0, this.AuthenticationManagerSettings.silent_redirect_uri.length) === this.AuthenticationManagerSettings.silent_redirect_uri)
-        {
-            this.RenewTokenSilent();
-        }
-        //if the actual page is the 'client_url', then i consider to make the 'login'
-        else if(location.href.substring(0, this.AuthenticationManagerSettings.client_url.length) === this.AuthenticationManagerSettings.client_url)
-        {
-            if(this.IsAuthenticated === false)
-            {
-                this.Login(shouldOpenOnPopUp);
-            }
-        }
-    }
+    //     //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
+    //     if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
+    //     {
+    //         this.ProcessTokenCallback();
+    //     }
+    //     //if the actual page is the 'silent_redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'
+    //     else if (location.href.substring(0, this.AuthenticationManagerSettings.silent_redirect_uri.length) === this.AuthenticationManagerSettings.silent_redirect_uri)
+    //     {
+    //         this.RenewTokenSilent();
+    //     }
+    //     //if the actual page is the 'client_url', then i consider to make the 'login'
+    //     else if(location.href.substring(0, this.AuthenticationManagerSettings.client_url.length) === this.AuthenticationManagerSettings.client_url)
+    //     {
+    //         if(this.IsAuthenticated === false)
+    //         {
+    //             this.Login(shouldOpenOnPopUp);
+    //         }
+    //     }
+    // }
     
     public Login(openOnPopUp?: boolean)
     {
