@@ -122,6 +122,7 @@ export class AuthenticationContext
         // {
         //     this.RenewTokenSilent();
         // }
+        //Go
         else
         {
             let defer = Q.defer<void>();
