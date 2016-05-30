@@ -67,7 +67,7 @@ export class AuthenticationContext
         localStorage.setItem('AuthenticationManagerSettings', JSON.stringify(value));
     }
     
-    protected Initialize(authenticationSettings: IAuthenticationSettings)
+    protected Initialize(authenticationSettings: IAuthenticationSettings): Q.IPromise<void>
     {
         if(authenticationSettings.authority == null || authenticationSettings.client_id == null)
         {
@@ -104,10 +104,10 @@ export class AuthenticationContext
         
         this.oidcTokenManager = new OidcTokenManager(this.AuthenticationManagerSettings);
         
-        this.ProcessTokenIfNeeded();
+        return this.ProcessTokenIfNeeded();
     }
     
-    protected ProcessTokenIfNeeded()
+    protected ProcessTokenIfNeeded() : Q.IPromise<void>
     {
         
         //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
@@ -115,7 +115,7 @@ export class AuthenticationContext
         if(location.href.indexOf('access_token=') > -1)
         {
             console.log('Processing token!');
-            this.ProcessTokenCallback();
+            return this.ProcessTokenCallback();
         }
         // //if the actual page is the 'silent_redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'
         // else if (location.href.substring(0, this.AuthenticationManagerSettings.silent_redirect_uri.length) === this.AuthenticationManagerSettings.silent_redirect_uri)
@@ -124,30 +124,47 @@ export class AuthenticationContext
         // }
     }
     
-    public Init(authenticationSettings: IAuthenticationSettings, force = false) 
+    public Init(authenticationSettings: IAuthenticationSettings, force = false) : Q.IPromise<void>
     {
         if(this.IsInitialized === false || force === true)
         {
-            this.Initialize(authenticationSettings);
+            return this.Initialize(authenticationSettings);
         }
     }
     
-    public ProcessTokenCallback()
+    public ProcessTokenCallback() : Q.IPromise<void>
     {
         
         
         this.ValidateInitialization();
         
-        Q.all([this.oidcTokenManager.processTokenCallbackAsync()])
+        
+        
+        
+        let defer = Q.defer<void>();
+        
+        this.oidcTokenManager.processTokenCallbackAsync()
         .then(
             () => {
                 this.RedirectToInitialPage();
+                
+                defer.resolve();
             },
             (error) => {
-                alert("Problem Getting Token : " + (error.message || error));
+                let message = "Problem Getting Token : " + (error.message || error); 
+                
+                defer.reject(message);
             }
-        )
-        .done();
+        );
+        
+        return defer.promise;
+        
+        
+        
+        
+        
+        
+        
         
         
         
