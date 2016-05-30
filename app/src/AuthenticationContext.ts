@@ -133,6 +133,8 @@ export class AuthenticationContext
     
     public ProcessTokenCallback()
     {
+        
+        
         this.ValidateInitialization();
         
         this.oidcTokenManager.processTokenCallbackAsync()
