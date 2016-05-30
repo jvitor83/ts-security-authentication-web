@@ -1,5 +1,6 @@
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
+import * as Q from 'q';
 import 'oidc-token-manager';
 /**
  * AuthenticationInitializer
@@ -12,10 +13,10 @@ export declare class AuthenticationContext {
     private oidcTokenManager;
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
-    protected Initialize(authenticationSettings: IAuthenticationSettings): void;
-    protected ProcessTokenIfNeeded(): void;
-    Init(authenticationSettings: IAuthenticationSettings, force?: boolean): void;
-    ProcessTokenCallback(): void;
+    protected Initialize(authenticationSettings: IAuthenticationSettings): Q.IPromise<void>;
+    protected ProcessTokenIfNeeded(): Q.IPromise<void>;
+    Init(authenticationSettings: IAuthenticationSettings, force?: boolean): Q.IPromise<void>;
+    ProcessTokenCallback(): Q.IPromise<void>;
     RenewTokenSilent(): void;
     protected RedirectToInitialPage(): void;
     protected ValidateInitialization(): void;
