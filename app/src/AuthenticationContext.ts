@@ -2,6 +2,7 @@ import { IAuthenticationSettings } from './IAuthenticationSettings';
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 //require('oidc-token-manager');
 //import 'oidc-token-manager/dist/oidc-token-manager.js';
+import * as Q from 'q';
 import 'oidc-token-manager';
 
 
@@ -137,7 +138,7 @@ export class AuthenticationContext
         
         this.ValidateInitialization();
         
-        this.oidcTokenManager.processTokenCallbackAsync()
+        Q.all([this.oidcTokenManager.processTokenCallbackAsync()])
         .then(
             () => {
                 this.RedirectToInitialPage();
@@ -145,7 +146,21 @@ export class AuthenticationContext
             (error) => {
                 alert("Problem Getting Token : " + (error.message || error));
             }
-        );
+        )
+        .done();
+        
+        
+        
+        // this.oidcTokenManager.processTokenCallbackAsync()
+        // .then(
+        //     () => {
+        //         this.RedirectToInitialPage();
+        //     },
+        //     (error) => {
+        //         alert("Problem Getting Token : " + (error.message || error));
+        //     }
+        // );
+        
     }
     
     public RenewTokenSilent()
