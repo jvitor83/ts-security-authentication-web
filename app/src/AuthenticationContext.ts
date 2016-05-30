@@ -122,7 +122,7 @@ export class AuthenticationContext
         // {
         //     this.RenewTokenSilent();
         // }
-        //Go
+        //Go Horse
         else
         {
             let defer = Q.defer<void>();
