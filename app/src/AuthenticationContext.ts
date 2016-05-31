@@ -67,7 +67,7 @@ export class AuthenticationContext
         localStorage.setItem('AuthenticationManagerSettings', JSON.stringify(value));
     }
     
-    protected Initialize(authenticationSettings: IAuthenticationSettings): Q.IPromise<void>
+    protected Initialize(authenticationSettings: IAuthenticationSettings)
     {
         if(authenticationSettings.authority == null || authenticationSettings.client_id == null)
         {
@@ -103,8 +103,6 @@ export class AuthenticationContext
         };
         
         this.oidcTokenManager = new OidcTokenManager(this.AuthenticationManagerSettings);
-        
-        return this.ProcessTokenIfNeeded();
     }
     
     protected ProcessTokenIfNeeded() : Q.IPromise<void>
@@ -131,25 +129,28 @@ export class AuthenticationContext
         }
     }
     
-    public Init(authenticationSettings: IAuthenticationSettings, force = false) : Q.IPromise<void>
+    public Init(authenticationSettings?: IAuthenticationSettings, force = false) : Q.IPromise<void>
     {
-        if(this.IsInitialized === false || force === true)
+        if(authenticationSettings != null)
         {
-            return this.Initialize(authenticationSettings);
+            if(this.IsInitialized === false || force === true)
+            {
+                this.Initialize(authenticationSettings);
+            }
+            else
+            {
+                throw "Should be unitializated to initialize. You are missing the force parameter?";
+            }
         }
+        
+        return this.ProcessTokenIfNeeded();
     }
     
     public ProcessTokenCallback() : Q.IPromise<void>
     {
-        
-        
         this.ValidateInitialization();
-        
-        
-        
-        
+               
         let defer = Q.defer<void>();
-        
         this.oidcTokenManager.processTokenCallbackAsync()
         .then(
             () => {
@@ -163,42 +164,23 @@ export class AuthenticationContext
                 defer.reject(message);
             }
         );
-        
         return defer.promise;
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        
-        // this.oidcTokenManager.processTokenCallbackAsync()
-        // .then(
-        //     () => {
-        //         this.RedirectToInitialPage();
-        //     },
-        //     (error) => {
-        //         alert("Problem Getting Token : " + (error.message || error));
-        //     }
-        // );
-        
     }
     
-    public RenewTokenSilent()
+    public RenewTokenSilent() : Q.IPromise<void>
     {
         this.ValidateInitialization();
         
+        let defer = Q.defer<void>();
         this.oidcTokenManager.renewTokenSilentAsync().then(
             () => {
-                
+                defer.resolve();
             },
             (error) => {
-                alert("Problem Getting Token : " + (error.message || error));
+                defer.reject("Problem Getting Token : " + (error.message || error));
             }
         );
+        return defer.promise;
     }
     
     protected RedirectToInitialPage()
@@ -286,7 +268,16 @@ export class AuthenticationContext
         }
     }
 
-    public get AccessTokenContent(): any 
+    public get TokensContents() : { AccessTokenContent: any, IdentityTokenContent: any, ProfileContent: any }
+    {
+        return {
+            AccessTokenContent: this.AccessTokenContent,
+            IdentityTokenContent: this.IdentityTokenContent,
+            ProfileContent: this.ProfileContent 
+        };
+    }
+
+    protected get AccessTokenContent(): any 
     {
         if(this.oidcTokenManager != null)
         {
@@ -303,7 +294,7 @@ export class AuthenticationContext
         return null;
     }
     
-    public get IdentityTokenContent(): any
+    protected get IdentityTokenContent(): any
     {
         if(this.oidcTokenManager != null)
         {
@@ -319,7 +310,7 @@ export class AuthenticationContext
         }
     }
     
-    public get ProfileContent(): any
+    protected get ProfileContent(): any
     {
         if(this.oidcTokenManager != null)
         {

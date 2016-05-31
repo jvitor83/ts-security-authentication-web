@@ -10,16 +10,21 @@ export declare class AuthenticationContext {
     private oidcTokenManager;
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
-    protected Initialize(authenticationSettings: IAuthenticationSettings): Q.IPromise<void>;
+    protected Initialize(authenticationSettings: IAuthenticationSettings): void;
     protected ProcessTokenIfNeeded(): Q.IPromise<void>;
-    Init(authenticationSettings: IAuthenticationSettings, force?: boolean): Q.IPromise<void>;
+    Init(authenticationSettings?: IAuthenticationSettings, force?: boolean): Q.IPromise<void>;
     ProcessTokenCallback(): Q.IPromise<void>;
-    RenewTokenSilent(): void;
+    RenewTokenSilent(): Q.IPromise<void>;
     protected RedirectToInitialPage(): void;
     protected ValidateInitialization(): void;
     Login(openOnPopUp?: boolean): void;
     IsAuthenticated: boolean;
-    AccessTokenContent: any;
-    IdentityTokenContent: any;
-    ProfileContent: any;
+    TokensContents: {
+        AccessTokenContent: any;
+        IdentityTokenContent: any;
+        ProfileContent: any;
+    };
+    protected AccessTokenContent: any;
+    protected IdentityTokenContent: any;
+    protected ProfileContent: any;
 }
