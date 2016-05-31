@@ -105,7 +105,7 @@ export class AuthenticationContext
         this.oidcTokenManager = new OidcTokenManager(this.AuthenticationManagerSettings);
     }
     
-    protected ProcessTokenIfNeeded() : Q.IPromise<void>
+    protected ProcessTokenIfNeeded() : Q.IPromise<TokensContents>
     {
         
         //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
@@ -123,13 +123,13 @@ export class AuthenticationContext
         //Go Horse
         else
         {
-            let defer = Q.defer<void>();
-            defer.resolve();
+            let defer = Q.defer<TokensContents>();
+            defer.resolve(this.TokensContents);
             return defer.promise;
         }
     }
     
-    public Init(authenticationSettings?: IAuthenticationSettings, force = false) : Q.IPromise<void>
+    public Init(authenticationSettings?: IAuthenticationSettings, force = false) : Q.IPromise<TokensContents>
     {
         if(authenticationSettings != null)
         {
@@ -146,17 +146,17 @@ export class AuthenticationContext
         return this.ProcessTokenIfNeeded();
     }
     
-    public ProcessTokenCallback() : Q.IPromise<void>
+    public ProcessTokenCallback() : Q.IPromise<TokensContents>
     {
         this.ValidateInitialization();
                
-        let defer = Q.defer<void>();
+        let defer = Q.defer<TokensContents>();
         this.oidcTokenManager.processTokenCallbackAsync()
         .then(
             () => {
                 this.RedirectToInitialPage();
                 
-                defer.resolve();
+                defer.resolve(this.TokensContents);
             },
             (error) => {
                 let message = "Problem Getting Token : " + (error.message || error); 

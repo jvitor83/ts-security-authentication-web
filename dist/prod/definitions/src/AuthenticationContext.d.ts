@@ -11,9 +11,9 @@ export declare class AuthenticationContext {
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
     protected Initialize(authenticationSettings: IAuthenticationSettings): void;
-    protected ProcessTokenIfNeeded(): Q.IPromise<void>;
-    Init(authenticationSettings?: IAuthenticationSettings, force?: boolean): Q.IPromise<void>;
-    ProcessTokenCallback(): Q.IPromise<void>;
+    protected ProcessTokenIfNeeded(): Q.IPromise<TokensContents>;
+    Init(authenticationSettings?: IAuthenticationSettings, force?: boolean): Q.IPromise<TokensContents>;
+    ProcessTokenCallback(): Q.IPromise<TokensContents>;
     RenewTokenSilent(): Q.IPromise<void>;
     protected RedirectToInitialPage(): void;
     protected ValidateInitialization(): void;
