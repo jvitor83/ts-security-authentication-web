@@ -258,30 +258,18 @@ export class AuthenticationContext
 
     public get IsAuthenticated() :boolean
     {
-        if(this.TokensContents == null)
+        if(this.TokensContents.IsAuthenticated === false)
         {
             return false;
         }
         else
         {
-            if(this.TokensContents.IsAuthenticated === false)
-            {
-                return false;
-            }
-            else
-            {
-                return true;
-            }
+            return true;
         }
     }
 
     public get TokensContents() : TokensContents
     {
-        if(!this.IsAuthenticated)
-        {
-            return new TokensContents();
-        }
-        
         let tokenContents = new TokensContents();
         
         tokenContents.AccessTokenContent = this.AccessTokenContent;
