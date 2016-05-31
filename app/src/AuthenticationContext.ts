@@ -234,7 +234,7 @@ export class AuthenticationContext
     
     public Login(openOnPopUp?: boolean)
     {
-        if(this.IsAuthenticated === false)
+        if(this.TokensContents.IsAuthenticated === false)
         {
             this.ValidateInitialization();
             
@@ -264,7 +264,14 @@ export class AuthenticationContext
         }
         else
         {
-            return true;
+            if(this.TokensContents.IsAuthenticated === false)
+            {
+                return false;
+            }
+            else
+            {
+                return true;
+            }
         }
     }
 
@@ -272,7 +279,7 @@ export class AuthenticationContext
     {
         if(!this.IsAuthenticated)
         {
-            throw "Should be previously authenticated!";
+            return new TokensContents();
         }
         
         let tokenContents = new TokensContents();
@@ -352,6 +359,18 @@ export class AuthenticationContext
 
 export class TokensContents
 {
+    public get IsAuthenticated() :boolean
+    {
+        if(this.AccessTokenContent == null)
+        {
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+    
     private _profileContent: any;
     public get ProfileContent(): any
     {

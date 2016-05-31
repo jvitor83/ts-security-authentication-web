@@ -36,6 +36,7 @@ export declare class AuthenticationContext {
     protected ProfileContent: any;
 }
 export declare class TokensContents {
+    IsAuthenticated: boolean;
     private _profileContent;
     ProfileContent: any;
     private _accessTokenContent;
