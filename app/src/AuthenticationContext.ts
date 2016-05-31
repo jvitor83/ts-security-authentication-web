@@ -268,13 +268,20 @@ export class AuthenticationContext
         }
     }
 
-    public get TokensContents() : { AccessTokenContent: any, IdentityTokenContent: any, ProfileContent: any }
+    public get TokensContents() : TokensContents
     {
-        return {
-            AccessTokenContent: this.AccessTokenContent,
-            IdentityTokenContent: this.IdentityTokenContent,
-            ProfileContent: this.ProfileContent 
-        };
+        if(!this.IsAuthenticated)
+        {
+            throw "Should be previously authenticated!";
+        }
+        
+        let tokenContents = new TokensContents();
+        
+        tokenContents.AccessTokenContent = this.AccessTokenContent;
+        tokenContents.IdentityTokenContent = this.IdentityTokenContent;
+        tokenContents.ProfileContent = this.ProfileContent;
+        
+        return tokenContents;
     }
 
     protected get AccessTokenContent(): any 
@@ -341,4 +348,45 @@ export class AuthenticationContext
     // }
     
 
+}
+
+export class TokensContents
+{
+    private _profileContent: any;
+    public get ProfileContent(): any
+    {
+        return this._profileContent;
+    }
+    public set ProfileContent(value: any)
+    {
+        this._profileContent = value;
+    }
+    
+    
+    private _accessTokenContent: any;
+    public get AccessTokenContent(): any
+    {
+        return this._accessTokenContent;
+    }
+    public set AccessTokenContent(value: any)
+    {
+        this._accessTokenContent = value;
+    }
+    
+    
+    private _identityTokenContent: any;
+    public get IdentityTokenContent(): any
+    {
+        return this._identityTokenContent;
+    }
+    public set IdentityTokenContent(value: any)
+    {
+        this._identityTokenContent = value;
+    }
+    
+    
+    public ToArray() : Array<any>
+    {
+        return [ this.IdentityTokenContent, this.AccessTokenContent, this.ProfileContent ];
+    }
 }

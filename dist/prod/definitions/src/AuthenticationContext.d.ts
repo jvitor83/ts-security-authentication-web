@@ -19,12 +19,17 @@ export declare class AuthenticationContext {
     protected ValidateInitialization(): void;
     Login(openOnPopUp?: boolean): void;
     IsAuthenticated: boolean;
-    TokensContents: {
-        AccessTokenContent: any;
-        IdentityTokenContent: any;
-        ProfileContent: any;
-    };
+    TokensContents: TokensContents;
     protected AccessTokenContent: any;
     protected IdentityTokenContent: any;
     protected ProfileContent: any;
+}
+export declare class TokensContents {
+    private _profileContent;
+    ProfileContent: any;
+    private _accessTokenContent;
+    AccessTokenContent: any;
+    private _identityTokenContent;
+    IdentityTokenContent: any;
+    ToArray(): Array<any>;
 }
