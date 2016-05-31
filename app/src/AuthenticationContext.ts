@@ -258,7 +258,7 @@ export class AuthenticationContext
 
     public get IsAuthenticated() :boolean
     {
-        if(this.AccessTokenContent == null)
+        if(this.TokensContents == null)
         {
             return false;
         }
