@@ -74,11 +74,22 @@ export class AuthenticationContext
             throw "Should be informed at least 'authority' and 'client_id'!";
         }
         
+        let defaultRedirectUri : string = null;
+        if(location.protocol.indexOf('file:') > -1)
+        {
+            defaultRedirectUri = 'urn:ietf:wg:oauth:2.0:oob:auto';
+        }
+        else
+        {
+            defaultRedirectUri = location.href;
+        }
+        
+        console.log(defaultRedirectUri);
         //Set default values if not informed
-        authenticationSettings.client_url = authenticationSettings.client_url || location.href; //Self uri
+        authenticationSettings.client_url = authenticationSettings.client_url || defaultRedirectUri; //Self uri
         authenticationSettings.scope = authenticationSettings.scope || 'openid profile email offline_access'; //OpenId default scopes
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
-        authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
+        //authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
         //Convert to the more complete IAuthenticationManagerSettings
         this.AuthenticationManagerSettings = 
@@ -90,8 +101,8 @@ export class AuthenticationContext
             response_type: authenticationSettings.response_type,
             scope: authenticationSettings.scope,
             
-            redirect_uri : authenticationSettings.client_url + '?callback=true',
-            silent_redirect_uri: authenticationSettings.client_url + "?silentrefreshframe=true",
+            redirect_uri : authenticationSettings.client_url,
+            silent_redirect_uri: authenticationSettings.client_url,
             post_logout_redirect_uri: authenticationSettings.client_url,
             
             authorization_url : authenticationSettings.authority + "/connect/authorize",
@@ -154,7 +165,7 @@ export class AuthenticationContext
         this.oidcTokenManager.processTokenCallbackAsync()
         .then(
             () => {
-                this.RedirectToInitialPage();
+                this.RedirectToInitialPage(this.AuthenticationManagerSettings.redirect_uri);
                 
                 defer.resolve(this.TokensContents);
             },
@@ -183,10 +194,12 @@ export class AuthenticationContext
         return defer.promise;
     }
     
-    protected RedirectToInitialPage()
+
+    protected RedirectToInitialPage(uri :string)
     {
-        location.assign(this.AuthenticationManagerSettings.client_url);
+        location.assign(uri);
     }
+
 
     
     protected ValidateInitialization()

@@ -18,7 +18,7 @@ export declare class AuthenticationContext {
     Init(authenticationSettings?: IAuthenticationSettings, force?: boolean): Q.IPromise<TokensContents>;
     ProcessTokenCallback(): Q.IPromise<TokensContents>;
     RenewTokenSilent(): Q.IPromise<void>;
-    protected RedirectToInitialPage(): void;
+    protected RedirectToInitialPage(uri: string): void;
     protected ValidateInitialization(): void;
     /**
      * Make the login at the current URI, and process the received tokens.
