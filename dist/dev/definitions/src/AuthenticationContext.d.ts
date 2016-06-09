@@ -31,7 +31,9 @@ export declare class AuthenticationContext {
     Login(openOnPopUp?: boolean): void;
     IsAuthenticated: boolean;
     TokensContents: TokensContents;
+    protected AccessToken: string;
     protected AccessTokenContent: any;
+    protected IdentityToken: string;
     protected IdentityTokenContent: any;
     protected ProfileContent: any;
 }
@@ -39,9 +41,14 @@ export declare class TokensContents {
     IsAuthenticated: boolean;
     private _profileContent;
     ProfileContent: any;
+    private _accessToken;
+    AccessToken: string;
     private _accessTokenContent;
     AccessTokenContent: any;
+    private _identityToken;
+    IdentityToken: string;
     private _identityTokenContent;
     IdentityTokenContent: any;
-    ToArray(): Array<any>;
+    jsonsToArray(): Array<any>;
+    encodedTokensToArray(): Array<any>;
 }

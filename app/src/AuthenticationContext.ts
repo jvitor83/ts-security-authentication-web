@@ -285,12 +285,26 @@ export class AuthenticationContext
     {
         let tokenContents = new TokensContents();
         
+        tokenContents.AccessToken = this.AccessToken;
+        tokenContents.IdentityToken = this.IdentityToken;
+        
         tokenContents.AccessTokenContent = this.AccessTokenContent;
         tokenContents.IdentityTokenContent = this.IdentityTokenContent;
         tokenContents.ProfileContent = this.ProfileContent;
         
         return tokenContents;
     }
+
+    protected get AccessToken(): string 
+    {
+        if (this.oidcTokenManager != null)
+        {
+            let id_token = this.oidcTokenManager.access_token;
+            return id_token;
+        }
+        return null;
+    }
+
 
     protected get AccessTokenContent(): any 
     {
@@ -308,6 +322,17 @@ export class AuthenticationContext
         }
         return null;
     }
+    
+    protected get IdentityToken(): string 
+    {
+        if (this.oidcTokenManager != null)
+        {
+            let id_token = this.oidcTokenManager.id_token;
+            return id_token;
+        }
+        return null;
+    }
+
     
     protected get IdentityTokenContent(): any
     {
@@ -337,25 +362,6 @@ export class AuthenticationContext
         }
         return null;
     }
-
-    // //TODO: Split the parser to another project (package - ts-security-tokens?)
-    // //Include refactory at the ts-security-identity also
-    // protected GenerateTokens()
-    // {
-
-            
-    //         if(this.oidcTokenManager.profile != null)
-    //         {
-    //             this.ProfileContent = this.oidcTokenManager.profile;
-    //         }
-    //     }
-        
-    //     // this.AccessTokenContent = JSON.parse(atob(this.oidcTokenManager.access_token.split('.')[1]));
-    //     // this.IdentityTokenContent = JSON.parse(atob(this.oidcTokenManager.id_token.split('.')[1]));
-    //     // this.ProfileContent = this.oidcTokenManager.profile;
-    // }
-    
-
 }
 
 export class TokensContents
@@ -383,6 +389,18 @@ export class TokensContents
     }
     
     
+    
+    private _accessToken: string;
+    public get AccessToken(): string
+    {
+        return this._accessToken;
+    }
+    public set AccessToken(value: string)
+    {
+        this._accessToken = value;
+    }
+    
+    
     private _accessTokenContent: any;
     public get AccessTokenContent(): any
     {
@@ -391,6 +409,20 @@ export class TokensContents
     public set AccessTokenContent(value: any)
     {
         this._accessTokenContent = value;
+    }
+    
+    
+    
+    
+    
+    private _identityToken: string;
+    public get IdentityToken(): string
+    {
+        return this._identityToken;
+    }
+    public set IdentityToken(value: string)
+    {
+        this._identityToken = value;
     }
     
     
@@ -405,8 +437,14 @@ export class TokensContents
     }
     
     
-    public ToArray() : Array<any>
+    
+    public jsonsToArray() : Array<any>
     {
         return [ this.IdentityTokenContent, this.AccessTokenContent, this.ProfileContent ];
+    }
+    
+    public encodedTokensToArray() : Array<any>
+    {
+        return [ this.IdentityToken, this.AccessToken ];
     }
 }
