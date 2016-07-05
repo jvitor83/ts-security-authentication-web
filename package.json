@@ -32,7 +32,6 @@
     "karma-systemjs": "^0.13.0",
     "merge2": "^1.0.2",
     "phantom-jasmine": "^0.3.0",
-    "phantomjs": "^2.1.7",
     "phantomjs-prebuilt": "^2.1.7",
     "requirejs": "^2.2.0",
     "run-sequence": "^1.1.5",

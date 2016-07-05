@@ -74,19 +74,14 @@ export class AuthenticationContext
             throw "Should be informed at least 'authority' and 'client_id'!";
         }
         
-        let defaultRedirectUri : string = null;
+        let defaultRedirectUri : string = authenticationSettings.client_url || location.href;
         if(location.protocol.indexOf('file:') > -1)
         {
             defaultRedirectUri = 'urn:ietf:wg:oauth:2.0:oob:auto';
         }
-        else
-        {
-            defaultRedirectUri = location.href;
-        }
         
         console.log(defaultRedirectUri);
         //Set default values if not informed
-        authenticationSettings.client_url = authenticationSettings.client_url || defaultRedirectUri; //Self uri
         authenticationSettings.scope = authenticationSettings.scope || 'openid profile email offline_access'; //OpenId default scopes
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
         //authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
@@ -101,9 +96,9 @@ export class AuthenticationContext
             response_type: authenticationSettings.response_type,
             scope: authenticationSettings.scope,
             
-            redirect_uri : authenticationSettings.client_url,
-            silent_redirect_uri: authenticationSettings.client_url,
-            post_logout_redirect_uri: authenticationSettings.client_url,
+            redirect_uri : defaultRedirectUri,
+            silent_redirect_uri: defaultRedirectUri,
+            post_logout_redirect_uri: defaultRedirectUri,
             
             authorization_url : authenticationSettings.authority + "/connect/authorize",
             token_url : authenticationSettings.authority + "/connect/token",
@@ -165,7 +160,7 @@ export class AuthenticationContext
         this.oidcTokenManager.processTokenCallbackAsync()
         .then(
             () => {
-                this.RedirectToInitialPage(this.AuthenticationManagerSettings.redirect_uri);
+                this.RedirectToInitialPage(this.AuthenticationManagerSettings.client_url);
                 
                 defer.resolve(this.TokensContents);
             },
