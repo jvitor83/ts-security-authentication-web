@@ -262,6 +262,8 @@ export class AuthenticationContext
             {
                 this.oidcTokenManager.redirectForToken();
             }
+
+            throw "Redirect to Login (Break the flow!)";
         }
         else
         {
