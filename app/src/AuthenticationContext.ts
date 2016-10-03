@@ -206,11 +206,18 @@ export class AuthenticationContext
         }
     }
     
-    public Init(authenticationSettings?: IAuthenticationSettings) : Q.IPromise<TokensContents>
+    public Init(authenticationSettings?: IAuthenticationSettings, force = false) : Q.IPromise<TokensContents>
     {
         if(authenticationSettings != null)
         {
-            this.Initialize(authenticationSettings);
+            if(this.IsInitialized === false || force === true)
+            {
+                this.Initialize(authenticationSettings);
+            }
+            else
+            {   
+                console.debug("Should be unitializated to initialize. You are missing the force parameter?");
+            }
         }
         
         return this.ProcessTokenIfNeeded();
