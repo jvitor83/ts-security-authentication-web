@@ -1,3 +1,5 @@
+/// <reference path="../../typings/index.d.ts" />
+
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 //require('oidc-token-manager');
@@ -125,7 +127,7 @@ export class AuthenticationContext
 
         //Retry indefinitly for renew
         this.oidcTokenManager.addOnSilentTokenRenewFailed(() => {
-            var count = 1;
+            let count = 1;
 
             let promise: Oidc.DefaultPromise = this.oidcTokenManager.renewTokenSilentAsync();
 

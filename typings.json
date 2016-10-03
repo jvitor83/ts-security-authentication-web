@@ -26,7 +26,26 @@
     "vinyl": "registry:dt/vinyl#1.1.0+20160316155526"
   },
   "globalDependencies": {
+    "gulp": "registry:dt/gulp#3.8.0+20160907112908",
+    "gulp-typescript": "registry:dt/gulp-typescript#0.0.0+20160317120654",
+    "jasmine": "registry:dt/jasmine#2.5.0+20161003201800",
+    "merge2": "registry:dt/merge2#0.3.6+20160316155526",
+    "node": "registry:dt/node#6.0.0+20160928143418",
     "oidc-token-manager": "registry:dt/oidc-token-manager#0.0.0+20160505172800",
-    "q": "registry:dt/q#0.0.0+20161002164103"
+    "orchestrator": "registry:dt/orchestrator#0.0.0+20160316155526",
+    "q": "registry:dt/q#0.0.0+20161002164103",
+    "systemjs": "registry:dt/systemjs#0.19.29+20160702105636",
+    "typescript": "registry:dt/typescript#0.4.0+20160317120654"
+  },
+  "globalDevDependencies": {
+    "browser-sync": "registry:dt/browser-sync#0.0.0+20160928124223",
+    "gulp-concat": "registry:dt/gulp-concat#0.0.0+20160316155526",
+    "gulp-tslint": "registry:dt/gulp-tslint#3.6.0+20160316155526",
+    "karma": "registry:dt/karma#0.13.9+20160811111312",
+    "karma-jasmine": "registry:dt/karma-jasmine#0.0.0+20160316155526",
+    "phantomjs": "registry:dt/phantomjs#1.9.0+20160316155526",
+    "run-sequence": "registry:dt/run-sequence#0.0.0+20160316155526",
+    "systemjs": "registry:dt/systemjs#0.19.29+20160702105636",
+    "vinyl": "registry:dt/vinyl#1.2.0+20160924121322"
   }
 }

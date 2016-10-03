@@ -1,15 +1,16 @@
-import { IAuthenticationSettings } from './IAuthenticationSettings';
+/// <reference path="../../typings/index.d.ts" />
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
-import * as Q from 'q';
-import 'oidc-token-manager';
+import { IAuthenticationSettings } from './IAuthenticationSettings';
 /**
  * AuthenticationInitializer
  */
 export declare class AuthenticationContext {
     private static _current;
+    private callbacksTokenObtained;
     static Current: AuthenticationContext;
     IsInitialized: boolean;
     static Reset(): void;
+    AddOnTokenObtained(callback: () => void): void;
     private oidcTokenManager;
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
@@ -28,7 +29,7 @@ export declare class AuthenticationContext {
      *
      * @param {boolean} [openOnPopUp] (description)
      */
-    Login(openOnPopUp?: boolean): void;
+    Login(): void;
     IsAuthenticated: boolean;
     TokensContents: TokensContents;
     protected AccessToken: string;
@@ -49,6 +50,6 @@ export declare class TokensContents {
     IdentityToken: string;
     private _identityTokenContent;
     IdentityTokenContent: any;
-    jsonsToArray(): Array<any>;
+    tokensContentsToArray(includeEncodedTokens?: boolean): Array<any>;
     encodedTokensToArray(): Array<any>;
 }
