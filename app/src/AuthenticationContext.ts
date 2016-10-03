@@ -103,6 +103,8 @@ export class AuthenticationContext
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
         //authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
+        authenticationSettings.max_retry_renew = authenticationSettings.max_retry_renew || 10;
+
         //Convert to the more complete IAuthenticationManagerSettings
         this.AuthenticationManagerSettings = 
         {
@@ -138,8 +140,14 @@ export class AuthenticationContext
             };
             let fail = (error) => {
                 count++;
-                console.error('Token not renewed! Trying again after ' + count.toString() + ' fails!');
-                return this.oidcTokenManager.renewTokenSilentAsync().then(success, fail);
+                console.error('Token not renewed! Trying again after ' + count.toString() + ' fails! Max retry set to ' + this.AuthenticationManagerSettings.max_retry_renew + '!');
+
+                if(count <= this.AuthenticationManagerSettings.max_retry_renew)
+                {
+                    return this.oidcTokenManager.renewTokenSilentAsync().then(success, fail);
+                }else{
+                    return promise;
+                }
             };
 
             let childPromise = promise.then(success, fail);
@@ -183,18 +191,11 @@ export class AuthenticationContext
         }
     }
     
-    public Init(authenticationSettings?: IAuthenticationSettings, force = false) : Q.IPromise<TokensContents>
+    public Init(authenticationSettings?: IAuthenticationSettings) : Q.IPromise<TokensContents>
     {
         if(authenticationSettings != null)
         {
-            if(this.IsInitialized === false || force === true)
-            {
-                this.Initialize(authenticationSettings);
-            }
-            else
-            {
-                console.debug("Should be unitializated to initialize. You are missing the force parameter?");
-            }
+            this.Initialize(authenticationSettings);
         }
         
         return this.ProcessTokenIfNeeded();
