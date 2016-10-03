@@ -4,10 +4,12 @@ import * as Q from 'q';
 export declare class AuthenticationContext {
     private static _current;
     private callbacksTokenObtained;
+    private callbacksTokenRenewFailedRetryMax;
     static Current: AuthenticationContext;
     IsInitialized: boolean;
     static Reset(): void;
     AddOnTokenObtained(callback: () => void): void;
+    AddOnTokenRenewFailedMaxRetry(callback: () => void): void;
     private oidcTokenManager;
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;

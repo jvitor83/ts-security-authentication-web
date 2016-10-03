@@ -20,6 +20,8 @@ export class AuthenticationContext
 
     private callbacksTokenObtained :Array<() => void> = new Array<() => void>();
 
+    private callbacksTokenRenewFailedRetryMax :Array<() => void> = new Array<() => void>();
+
     public static get Current(): AuthenticationContext 
     {
         if(AuthenticationContext._current === null)
@@ -50,6 +52,12 @@ export class AuthenticationContext
     {
         this.callbacksTokenObtained.push(callback);
         this.oidcTokenManager.addOnTokenObtained(callback);
+    }
+
+    public AddOnTokenRenewFailedMaxRetry(callback: () => void)
+    {
+        this.callbacksTokenRenewFailedRetryMax.push(callback);
+        //this.oidcTokenManager.addOnSilentTokenRenewFailed(callback);
     }
 
     private oidcTokenManager: any;
@@ -140,12 +148,16 @@ export class AuthenticationContext
             };
             let fail = (error) => {
                 count++;
-                console.error('Token not renewed! Trying again after ' + count.toString() + ' fails! Max retry set to ' + this.AuthenticationManagerSettings.max_retry_renew + '!');
+                console.debug('Token not renewed! Trying again after ' + count.toString() + ' fails! Max retry set to ' + this.AuthenticationManagerSettings.max_retry_renew + '!');
 
                 if(count <= this.AuthenticationManagerSettings.max_retry_renew)
                 {
                     return this.oidcTokenManager.renewTokenSilentAsync().then(success, fail);
                 }else{
+                    console.error('Token not renewed!');
+                    this.callbacksTokenRenewFailedRetryMax.forEach((callback)=> {
+                        callback();
+                    });
                     return promise;
                 }
             };
