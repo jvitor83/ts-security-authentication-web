@@ -1,9 +1,9 @@
-import { IAuthenticationSettings } from './IAuthenticationSettings';
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
+import { IAuthenticationSettings } from './IAuthenticationSettings';
 //require('oidc-token-manager');
 //import 'oidc-token-manager/dist/oidc-token-manager.js';
-import * as Q from 'q';
-import 'oidc-token-manager';
+//import * as Q from 'q';
+//import 'oidc-token-manager';
 
 
 /**
@@ -13,6 +13,8 @@ export class AuthenticationContext
 {
     
     private static _current: AuthenticationContext = null;
+
+    private callbacksTokenObtained :Array<() => void> = new Array<() => void>();
 
     public static get Current(): AuthenticationContext 
     {
@@ -38,6 +40,12 @@ export class AuthenticationContext
     public static Reset()
     {
         AuthenticationContext._current = null;
+    }
+
+    public AddOnTokenObtained(callback: () => void)
+    {
+        this.callbacksTokenObtained.push(callback);
+        this.oidcTokenManager.addOnTokenObtained(callback);
     }
 
     private oidcTokenManager: Oidc.OidcTokenManager;
@@ -97,7 +105,7 @@ export class AuthenticationContext
             authority: authenticationSettings.authority,
             client_id: authenticationSettings.client_id,
             client_url: authenticationSettings.client_url,
-            open_on_popup: authenticationSettings.open_on_popup,
+            
             response_type: authenticationSettings.response_type,
             scope: authenticationSettings.scope,
             
@@ -105,25 +113,56 @@ export class AuthenticationContext
             silent_redirect_uri: authenticationSettings.client_url,
             post_logout_redirect_uri: authenticationSettings.client_url,
             
-            authorization_url : authenticationSettings.authority + "/connect/authorize",
-            token_url : authenticationSettings.authority + "/connect/token",
-            userinfo_url: authenticationSettings.authority + "/connect/userinfo",
+            authorization_url : authenticationSettings.authorization_url || authenticationSettings.authority + "/connect/authorize",
+            token_url : authenticationSettings.token_url || authenticationSettings.authority + "/connect/token",
+            userinfo_url: authenticationSettings.userinfo_url || authenticationSettings.authority + "/connect/userinfo",
             
             load_user_profile: true,
             silent_renew: true,
         };
         
         this.oidcTokenManager = new OidcTokenManager(this.AuthenticationManagerSettings);
+
+        //Retry indefinitly for renew
+        this.oidcTokenManager.addOnSilentTokenRenewFailed(() => {
+            var count = 1;
+
+            let promise: Oidc.DefaultPromise = this.oidcTokenManager.renewTokenSilentAsync();
+
+            let success = () => {
+                console.debug('Renewed after ' + count.toString() + ' fails!');
+            };
+            let fail = (error) => {
+                count++;
+                console.error('Token not renewed! Trying again after ' + count.toString() + ' fails!');
+                return this.oidcTokenManager.renewTokenSilentAsync().then(success, fail);
+            };
+
+            let childPromise = promise.then(success, fail);
+            return childPromise;
+        });
+
+        
     }
     
     protected ProcessTokenIfNeeded() : Q.IPromise<TokensContents>
     {
-        
+        if (location.href.indexOf('access_token=') > -1 && (this.oidcTokenManager.access_token != null || location.href.indexOf('prompt=none') > -1)) {
+            console.debug('Processing token! (silently)');
+            this.oidcTokenManager.processTokenCallbackSilent();
+            console.debug('Token processed! (silently)');
+
+            let defer = Q.defer<TokensContents>();
+            defer.resolve(this.TokensContents);
+            return defer.promise;
+        } else 
+
+
         //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
         //if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
         if(location.href.indexOf('access_token=') > -1)
         {
-            console.log('Processing token!');
+            console.debug('Processing token!');
             return this.ProcessTokenCallback();
         }
         // //if the actual page is the 'silent_redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'
@@ -245,29 +284,24 @@ export class AuthenticationContext
     //     }
     // }
     
-    public Login(openOnPopUp?: boolean)
+    public Login()
     {
         if(this.TokensContents.IsAuthenticated === false)
         {
             this.ValidateInitialization();
             
-            //TODO: Treat when in mobile browser to not support popup
-            let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
-            
-            if (shouldOpenOnPopUp)
-            {
-                this.oidcTokenManager.openPopupForTokenAsync();
-            }
-            else
-            {
-                this.oidcTokenManager.redirectForToken();
-            }
+            this.oidcTokenManager.redirectForToken();
 
+            //TODO: Need fix (another way to not let the js runtime to continue)
+            //Should refactor to return a promise with an argument? 
             throw "Redirect to Login (Break the flow!)";
         }
         else
         {
             console.warn('Already authenticated');
+            this.callbacksTokenObtained.forEach((callback) => {
+                callback();
+            });
         }
     }
 
@@ -440,9 +474,24 @@ export class TokensContents
     
     
     
-    public jsonsToArray() : Array<any>
+    public tokensContentsToArray(includeEncodedTokens:boolean = true) : Array<any>
     {
-        return [ this.IdentityTokenContent, this.AccessTokenContent, this.ProfileContent ];
+        let tokensContents = new Array<any>();
+
+        tokensContents.push(this.IdentityTokenContent);
+        tokensContents.push(this.AccessTokenContent);
+        tokensContents.push(this.ProfileContent);
+
+        if(includeEncodedTokens)
+        {
+            let accessTokenEncoded = { 'access_token': AuthenticationContext.Current.TokensContents.AccessToken };
+            tokensContents.push(accessTokenEncoded);
+
+            let identityTokenEncoded = { 'id_token': AuthenticationContext.Current.TokensContents.IdentityToken };
+            tokensContents.push(identityTokenEncoded); 
+        }
+
+        return tokensContents;
     }
     
     public encodedTokensToArray() : Array<any>

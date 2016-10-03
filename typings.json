@@ -24,5 +24,9 @@
     "run-sequence": "registry:dt/run-sequence#0.0.0+20160316155526",
     "systemjs": "registry:dt/systemjs#0.18.4+20160417155658",
     "vinyl": "registry:dt/vinyl#1.1.0+20160316155526"
+  },
+  "globalDependencies": {
+    "oidc-token-manager": "registry:dt/oidc-token-manager#0.0.0+20160505172800",
+    "q": "registry:dt/q#0.0.0+20161002164103"
   }
 }

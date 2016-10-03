@@ -6,6 +6,8 @@ export interface IAuthenticationSettings
     response_type?: string;
     
     client_url?: string;
-    
-    open_on_popup?: boolean;
+
+    authorization_url? : string;
+    token_url? : string;
+    userinfo_url? : string;
 }
