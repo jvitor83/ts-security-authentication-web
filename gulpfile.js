@@ -56,7 +56,7 @@ gulp.task('test:integration', function() {
 gulp.task('scripts', ['tslint', 'vendors'], function() {
 	let tsResult = gulp.src('app/**/*.ts')
                     .pipe(gulp_sourcemaps.init())
-					.pipe(gulp_typescript({module: moduleGeneration, target: targetGeneration, declaration: true, sortOutput: true}));
+					.pipe(gulp_typescript({module: moduleGeneration, target: targetGeneration, declaration: true, sortOutput: true, removeComments: true}));
   
 	return merge2([ // Merge the two output streams, so this task is finished when the IO of both operations are done. 
 		tsResult.dts

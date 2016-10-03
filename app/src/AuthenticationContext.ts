@@ -1,11 +1,13 @@
-/// <reference path="../../typings/index.d.ts" />
-
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 //require('oidc-token-manager');
 //import 'oidc-token-manager/dist/oidc-token-manager.js';
-//import * as Q from 'q';
+import * as Q from 'q';
 //import 'oidc-token-manager';
+
+//Should be globally imported
+declare var Oidc : any;
+declare var OidcTokenManager : any;
 
 
 /**
@@ -50,7 +52,7 @@ export class AuthenticationContext
         this.oidcTokenManager.addOnTokenObtained(callback);
     }
 
-    private oidcTokenManager: Oidc.OidcTokenManager;
+    private oidcTokenManager: any;
         
     constructor() 
     {

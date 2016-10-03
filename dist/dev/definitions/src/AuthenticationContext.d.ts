@@ -1,9 +1,6 @@
-/// <reference path="../../typings/index.d.ts" />
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
-/**
- * AuthenticationInitializer
- */
+import * as Q from 'q';
 export declare class AuthenticationContext {
     private static _current;
     private callbacksTokenObtained;
@@ -21,14 +18,6 @@ export declare class AuthenticationContext {
     RenewTokenSilent(): Q.IPromise<void>;
     protected RedirectToInitialPage(uri: string): void;
     protected ValidateInitialization(): void;
-    /**
-     * Make the login at the current URI, and process the received tokens.
-     * OBS: The Redirect URI [callback_url] (to receive the token) and Silent Refresh Frame URI [silent_redirect_uri] (to auto renew when expired) if not informed is auto generated based on the 'client_url' informed at 'Init' method with the followin strategy:
-     * `redirect_url = client_url + '?callback=true'`
-     * `silent_redirect_uri = client_url + '?silentrefreshframe=true'`
-     *
-     * @param {boolean} [openOnPopUp] (description)
-     */
     Login(): void;
     IsAuthenticated: boolean;
     TokensContents: TokensContents;

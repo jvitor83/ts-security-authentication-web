@@ -1,6 +1,6 @@
-/// <reference path="../../typings/index.d.ts" />
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
+import * as Q from 'q';
 export declare class AuthenticationContext {
     private static _current;
     private callbacksTokenObtained;
