@@ -112,6 +112,7 @@ export class AuthenticationContext
         //authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
         authenticationSettings.max_retry_renew = authenticationSettings.max_retry_renew || 10;
+        console.debug('Max retry setted to :' + authenticationSettings.max_retry_renew);
 
         //Convert to the more complete IAuthenticationManagerSettings
         this.AuthenticationManagerSettings = 
@@ -119,6 +120,8 @@ export class AuthenticationContext
             authority: authenticationSettings.authority,
             client_id: authenticationSettings.client_id,
             client_url: authenticationSettings.client_url,
+
+            max_retry_renew: authenticationSettings.max_retry_renew, 
             
             response_type: authenticationSettings.response_type,
             scope: authenticationSettings.scope,
