@@ -230,7 +230,7 @@ export class AuthenticationContext
             },
             (error) => {
                 let message = "Problem Getting Token : " + (error.message || error); 
-                
+                console.error(message);
                 defer.reject(message);
             }
         );
@@ -247,7 +247,9 @@ export class AuthenticationContext
                 defer.resolve();
             },
             (error) => {
-                defer.reject("Problem Getting Token : " + (error.message || error));
+                let message = "Problem Getting Token : " + (error.message || error); 
+                console.error(message);
+                defer.reject(message);
             }
         );
         return defer.promise;
