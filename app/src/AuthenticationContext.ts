@@ -120,6 +120,7 @@ export class AuthenticationContext
             client_url: authenticationSettings.client_url,
 
             max_retry_renew: authenticationSettings.max_retry_renew, 
+            silent_renew_timeout: authenticationSettings.silent_renew_timeout,
             
             response_type: authenticationSettings.response_type,
             scope: authenticationSettings.scope,
