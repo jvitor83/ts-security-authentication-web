@@ -89,30 +89,26 @@ export class AuthenticationContext
     
     protected Initialize(authenticationSettings: IAuthenticationSettings)
     {
-        if(authenticationSettings.authority == null || authenticationSettings.client_id == null)
+        if(authenticationSettings.authority == null || authenticationSettings.client_id == null || authenticationSettings.client_url == null)
         {
-            throw "Should be informed at least 'authority' and 'client_id'!";
+            throw "Should be informed at least 'authority', 'client_id' and 'client_url'!";
         }
         
-        let defaultRedirectUri : string = null;
-        if(location.protocol.indexOf('file:') > -1)
+        if(authenticationSettings.client_url.indexOf('file:') > -1)
         {
-            defaultRedirectUri = 'urn:ietf:wg:oauth:2.0:oob:auto';
-        }
-        else
-        {
-            defaultRedirectUri = location.href;
+            authenticationSettings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
         }
         
-        console.log(defaultRedirectUri);
         //Set default values if not informed
-        authenticationSettings.client_url = authenticationSettings.client_url || defaultRedirectUri; //Self uri
+        authenticationSettings.client_url = authenticationSettings.client_url; //Self uri
+        console.debug('ClientUrl: ' + authenticationSettings.client_url);
+
         authenticationSettings.scope = authenticationSettings.scope || 'openid profile email offline_access'; //OpenId default scopes
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
         //authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
         authenticationSettings.max_retry_renew = authenticationSettings.max_retry_renew || 35;
-        console.debug('Max retry setted to :' + authenticationSettings.max_retry_renew);
+        console.debug('Max retry setted to: ' + authenticationSettings.max_retry_renew);
 
         //Convert to the more complete IAuthenticationManagerSettings
         this.AuthenticationManagerSettings = 
@@ -316,7 +312,7 @@ export class AuthenticationContext
 
             //TODO: Need fix (another way to not let the js runtime to continue)
             //Should refactor to return a promise with an argument? 
-            throw "Redirect to Login (Break the flow!)";
+            throw "Redirecting to Login!";
         }
         else
         {
