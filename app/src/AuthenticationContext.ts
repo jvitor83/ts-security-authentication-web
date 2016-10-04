@@ -109,6 +109,8 @@ export class AuthenticationContext
 
         authenticationSettings.max_retry_renew = authenticationSettings.max_retry_renew || 35;
         console.debug('Max retry setted to: ' + authenticationSettings.max_retry_renew);
+        authenticationSettings.silent_renew_timeout = authenticationSettings.silent_renew_timeout || 40 * 1000; //40 seconds to timeout
+        console.debug('Silent renew timeout setted to: ' + authenticationSettings.max_retry_renew);
 
         //Convert to the more complete IAuthenticationManagerSettings
         this.AuthenticationManagerSettings = 

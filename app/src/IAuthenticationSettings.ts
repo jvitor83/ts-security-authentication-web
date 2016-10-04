@@ -8,6 +8,7 @@ export interface IAuthenticationSettings
     client_url?: string;
 
     max_retry_renew?: number;
+    silent_renew_timeout?: number;
 
     authorization_url? : string;
     token_url? : string;
