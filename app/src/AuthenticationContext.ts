@@ -111,7 +111,7 @@ export class AuthenticationContext
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
         //authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
-        authenticationSettings.max_retry_renew = authenticationSettings.max_retry_renew || 10;
+        authenticationSettings.max_retry_renew = authenticationSettings.max_retry_renew || 35;
         console.debug('Max retry setted to :' + authenticationSettings.max_retry_renew);
 
         //Convert to the more complete IAuthenticationManagerSettings
@@ -153,7 +153,7 @@ export class AuthenticationContext
                 count++;
                 console.debug('Token not renewed! Trying again after ' + count.toString() + ' fails! Max retry set to ' + this.AuthenticationManagerSettings.max_retry_renew + '!');
 
-                if(count <= this.AuthenticationManagerSettings.max_retry_renew)
+                if(count < this.AuthenticationManagerSettings.max_retry_renew)
                 {
                     return this.oidcTokenManager.renewTokenSilentAsync().then(success, fail);
                 }else{
