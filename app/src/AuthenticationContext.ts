@@ -94,7 +94,7 @@ export class AuthenticationContext
             throw "Should be informed at least 'authority', 'client_id' and 'client_url'!";
         }
         
-        if(authenticationSettings.client_url.indexOf('file:') > -1)
+        if(authenticationSettings.client_url.indexOf('file:') > -1 || ((location.href.indexOf('file:') > -1) || location.protocol.indexOf('file') > -1))
         {
             authenticationSettings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
         }
