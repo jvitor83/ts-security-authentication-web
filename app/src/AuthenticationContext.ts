@@ -94,9 +94,17 @@ export class AuthenticationContext
             throw "Should be informed at least 'authority', 'client_id' and 'client_url'!";
         }
         
-        if(authenticationSettings.client_url.indexOf('file:') > -1 || ((location.href.indexOf('file:') > -1) || location.protocol.indexOf('file') > -1))
+        if(authenticationSettings.use_ietf_pattern == null)
         {
-            authenticationSettings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
+            authenticationSettings.use_ietf_pattern = true;
+        }
+
+        if(authenticationSettings.use_ietf_pattern != null && authenticationSettings.use_ietf_pattern === true)
+        {
+            if(authenticationSettings.client_url.indexOf('file:') > -1 || ((location.href.indexOf('file:') > -1) || location.protocol.indexOf('file') > -1))
+            {
+                authenticationSettings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
+            }
         }
         
         //Set default values if not informed

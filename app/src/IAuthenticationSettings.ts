@@ -6,6 +6,7 @@ export interface IAuthenticationSettings
     response_type?: string;
     
     client_url?: string;
+    use_ietf_pattern?: boolean;
 
     max_retry_renew?: number;
     silent_renew_timeout?: number;
