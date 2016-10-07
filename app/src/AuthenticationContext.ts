@@ -113,7 +113,7 @@ export class AuthenticationContext
 
         authenticationSettings.scope = authenticationSettings.scope || 'openid profile email offline_access'; //OpenId default scopes
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
-        //authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
+        authenticationSettings.open_on_popup = authenticationSettings.open_on_popup || false; //Redirect for default
 
         authenticationSettings.max_retry_renew = authenticationSettings.max_retry_renew || 35;
         console.debug('Max retry setted to: ' + authenticationSettings.max_retry_renew);
@@ -313,13 +313,24 @@ export class AuthenticationContext
     //     }
     // }
     
-    public Login()
+    public Login(openOnPopUp?: boolean)
     {
         if(this.TokensContents.IsAuthenticated === false)
         {
             this.ValidateInitialization();
             
-            this.oidcTokenManager.redirectForToken();
+            //TODO: Treat when in mobile browser to not support popup
+            let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
+            
+            if (shouldOpenOnPopUp)
+            {
+                this.oidcTokenManager.openPopupForTokenAsync();
+            }
+            else
+            {
+                this.oidcTokenManager.redirectForToken();
+            }
+
 
             //TODO: Need fix (another way to not let the js runtime to continue)
             //Should refactor to return a promise with an argument? 

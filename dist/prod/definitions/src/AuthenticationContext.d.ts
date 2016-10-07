@@ -20,7 +20,7 @@ export declare class AuthenticationContext {
     RenewTokenSilent(): Q.IPromise<void>;
     protected RedirectToInitialPage(uri: string): void;
     protected ValidateInitialization(): void;
-    Login(): void;
+    Login(openOnPopUp?: boolean): void;
     IsAuthenticated: boolean;
     TokensContents: TokensContents;
     protected AccessToken: string;
