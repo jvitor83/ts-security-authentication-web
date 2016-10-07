@@ -1,13 +1,12 @@
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
-//require('oidc-token-manager');
-//import 'oidc-token-manager/dist/oidc-token-manager.js';
-import * as Q from 'q';
-//import 'oidc-token-manager';
 
-//Should be globally imported
-declare var Oidc : any;
-declare var OidcTokenManager : any;
+
+//import * as Q from 'q';
+
+import * as Oidc from 'oidc-client';
+
+ 
 
 
 /**
@@ -51,7 +50,7 @@ export class AuthenticationContext
     public AddOnTokenObtained(callback: () => void)
     {
         this.callbacksTokenObtained.push(callback);
-        this.oidcTokenManager.addOnTokenObtained(callback);
+        this.oidcTokenManager.events.addUserLoaded(callback);
     }
 
     public AddOnTokenRenewFailedMaxRetry(callback: () => void)
@@ -60,14 +59,14 @@ export class AuthenticationContext
         //this.oidcTokenManager.addOnSilentTokenRenewFailed(callback);
     }
 
-    private oidcTokenManager: any;
+    private oidcTokenManager: Oidc.UserManager;
         
     constructor() 
     {
         let authenticationSettingsLoadedFromStorage = this.AuthenticationManagerSettings;
         if(authenticationSettingsLoadedFromStorage != null)
         {
-            this.oidcTokenManager = new OidcTokenManager( authenticationSettingsLoadedFromStorage );
+            this.oidcTokenManager = new Oidc.UserManager( authenticationSettingsLoadedFromStorage );
         }
     }
     
@@ -145,52 +144,55 @@ export class AuthenticationContext
             silent_renew: true,
         };
         
-        this.oidcTokenManager = new OidcTokenManager(this.AuthenticationManagerSettings);
+        this.oidcTokenManager = new Oidc.UserManager(this.AuthenticationManagerSettings);
 
-        //Retry indefinitly for renew
-        this.oidcTokenManager.addOnSilentTokenRenewFailed(() => {
-            let count = 1;
-
-            let promise: Oidc.DefaultPromise = this.oidcTokenManager.renewTokenSilentAsync();
-
-            let success = () => {
-                console.debug('Renewed after ' + count.toString() + ' fails!');
-            };
-            let fail = (error) => {
-                count++;
-                console.debug('Token not renewed! Trying again after ' + count.toString() + ' fails! Max retry set to ' + this.AuthenticationManagerSettings.max_retry_renew + '!');
-
-                if(count < this.AuthenticationManagerSettings.max_retry_renew)
-                {
-                    return this.oidcTokenManager.renewTokenSilentAsync().then(success, fail);
-                }else{
-                    console.error('Token not renewed!');
-                    this.callbacksTokenRenewFailedRetryMax.forEach((callback)=> {
-                        callback();
-                    });
-                    return promise;
-                }
-            };
-
-            let childPromise = promise.then(success, fail);
-            return childPromise;
+        this.oidcTokenManager.events.addUserLoaded((user: Oidc.UserManager) => {
+            this.AuthenticationManagerSettings.is_authenticated = true;
+            this.AuthenticationManagerSettings = this.AuthenticationManagerSettings;
         });
+        //Retry indefinitly for renew
+        // this.oidcTokenManager.events.addSilentRenewError(() => {
+        //     let count = 1;
+
+        //     this.oidcTokenManager.signinSilent();
+
+        //     let success = () => {
+        //         console.debug('Renewed after ' + count.toString() + ' fails!');
+        //     };
+        //     let fail = (error) => {
+        //         count++;
+        //         console.debug('Token not renewed! Trying again after ' + count.toString() + ' fails! Max retry set to ' + this.AuthenticationManagerSettings.max_retry_renew + '!');
+
+        //         if(count < this.AuthenticationManagerSettings.max_retry_renew)
+        //         {
+        //             return this.oidcTokenManager.renewTokenSilentAsync().then(success, fail);
+        //         }else{
+        //             console.error('Token not renewed!');
+        //             this.callbacksTokenRenewFailedRetryMax.forEach((callback)=> {
+        //                 callback();
+        //             });
+        //             return promise;
+        //         }
+        //     };
+
+        //     let childPromise = promise.then(success, fail);
+        //     return childPromise;
+        // });
 
         
     }
     
-    protected ProcessTokenIfNeeded() : Q.IPromise<TokensContents>
+
+
+
+
+    protected ProcessTokenIfNeeded() : PromiseLike<Oidc.User>
     {
-        if (location.href.indexOf('access_token=') > -1 && (this.oidcTokenManager.access_token != null || location.href.indexOf('prompt=none') > -1)) {
+        if (location.href.indexOf('access_token=') > -1 && (this.oidcTokenManager.querySessionStatus() != null || location.href.indexOf('prompt=none') > -1)) {
             console.debug('Processing token! (silently)');
-            this.oidcTokenManager.processTokenCallbackSilent();
+            this.oidcTokenManager.signinSilentCallback();
             console.debug('Token processed! (silently)');
-
-            let defer = Q.defer<TokensContents>();
-            defer.resolve(this.TokensContents);
-            return defer.promise;
         } else 
-
 
         //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
         //if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
@@ -205,15 +207,9 @@ export class AuthenticationContext
         //     this.RenewTokenSilent();
         // }
         //Go Horse
-        else
-        {
-            let defer = Q.defer<TokensContents>();
-            defer.resolve(this.TokensContents);
-            return defer.promise;
-        }
     }
     
-    public Init(authenticationSettings?: IAuthenticationSettings) : Q.IPromise<TokensContents>
+    public Init(authenticationSettings?: IAuthenticationSettings) : PromiseLike<Oidc.User>
     {
         if(authenticationSettings != null)
         {
@@ -223,44 +219,53 @@ export class AuthenticationContext
         return this.ProcessTokenIfNeeded();
     }
     
-    public ProcessTokenCallback() : Q.IPromise<TokensContents>
+    public ProcessTokenCallback() : PromiseLike<any>
     {
         this.ValidateInitialization();
                
-        let defer = Q.defer<TokensContents>();
-        this.oidcTokenManager.processTokenCallbackAsync()
+        let promise: PromiseLike<any> = null;
+
+        if(this.AuthenticationManagerSettings.open_on_popup)
+        {
+            promise = this.oidcTokenManager.signinPopupCallback();
+        }
+        else
+        {
+            promise = this.oidcTokenManager.signinRedirectCallback();
+        }
+
+        let promiseRedirect = promise
         .then(
             () => {
                 this.RedirectToInitialPage(this.AuthenticationManagerSettings.redirect_uri);
-                
-                defer.resolve(this.TokensContents);
             },
             (error) => {
-                let message = "Problem Getting Token : " + (error.message || error); 
+                let message = "Problem Getting Token : " + (error.message || error);
                 console.error(message);
-                defer.reject(message);
+                throw message;
             }
         );
-        return defer.promise;
+
+        return promiseRedirect;
     }
     
-    public RenewTokenSilent() : Q.IPromise<void>
-    {
-        this.ValidateInitialization();
+    // public RenewTokenSilent() : Q.IPromise<void>
+    // {
+    //     this.ValidateInitialization();
         
-        let defer = Q.defer<void>();
-        this.oidcTokenManager.renewTokenSilentAsync().then(
-            () => {
-                defer.resolve();
-            },
-            (error) => {
-                let message = "Problem Getting Token : " + (error.message || error); 
-                console.error(message);
-                defer.reject(message);
-            }
-        );
-        return defer.promise;
-    }
+    //     let defer = Q.defer<void>();
+    //     this.oidcTokenManager.renewTokenSilentAsync().then(
+    //         () => {
+    //             defer.resolve();
+    //         },
+    //         (error) => {
+    //             let message = "Problem Getting Token : " + (error.message || error); 
+    //             console.error(message);
+    //             defer.reject(message);
+    //         }
+    //     );
+    //     return defer.promise;
+    // }
     
 
     protected RedirectToInitialPage(uri :string)
@@ -313,9 +318,9 @@ export class AuthenticationContext
     //     }
     // }
     
-    public Login(openOnPopUp?: boolean)
+    public Login(openOnPopUp?: boolean) : PromiseLike<any>
     {
-        if(this.TokensContents.IsAuthenticated === false)
+        if(this.IsAuthenticated === false)
         {
             this.ValidateInitialization();
             
@@ -324,17 +329,12 @@ export class AuthenticationContext
             
             if (shouldOpenOnPopUp)
             {
-                this.oidcTokenManager.openPopupForTokenAsync();
+                return this.oidcTokenManager.signinPopup();
             }
             else
             {
-                this.oidcTokenManager.redirectForToken();
+                return this.oidcTokenManager.signinRedirect();
             }
-
-
-            //TODO: Need fix (another way to not let the js runtime to continue)
-            //Should refactor to return a promise with an argument? 
-            throw "Redirecting to Login!";
         }
         else
         {
@@ -347,195 +347,188 @@ export class AuthenticationContext
 
     public get IsAuthenticated() :boolean
     {
-        if(this.TokensContents.IsAuthenticated === false)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
+        return this.AuthenticationManagerSettings.is_authenticated;
     }
 
-    public get TokensContents() : TokensContents
-    {
-        let tokenContents = new TokensContents();
+    // public get TokensContents() : TokensContents
+    // {
+    //     let tokenContents = new TokensContents();
         
-        tokenContents.AccessToken = this.AccessToken;
-        tokenContents.IdentityToken = this.IdentityToken;
+    //     tokenContents.AccessToken = this.AccessToken;
+    //     tokenContents.IdentityToken = this.IdentityToken;
         
-        tokenContents.AccessTokenContent = this.AccessTokenContent;
-        tokenContents.IdentityTokenContent = this.IdentityTokenContent;
-        tokenContents.ProfileContent = this.ProfileContent;
+    //     tokenContents.AccessTokenContent = this.AccessTokenContent;
+    //     tokenContents.IdentityTokenContent = this.IdentityTokenContent;
+    //     tokenContents.ProfileContent = this.ProfileContent;
         
-        return tokenContents;
-    }
+    //     return tokenContents;
+    // }
 
-    protected get AccessToken(): string 
-    {
-        if (this.oidcTokenManager != null)
-        {
-            let id_token = this.oidcTokenManager.access_token;
-            return id_token;
-        }
-        return null;
-    }
+    // protected get AccessToken(): string 
+    // {
+    //     if (this.oidcTokenManager != null)
+    //     {
+    //         let id_token = this.oidcTokenManager.access_token;
+    //         return id_token;
+    //     }
+    //     return null;
+    // }
 
 
-    protected get AccessTokenContent(): any 
-    {
-        if(this.oidcTokenManager != null)
-        {
-            if(this.oidcTokenManager.access_token != null)
-            {
-                let accessTokenContent = this.oidcTokenManager.access_token.split('.')[1];
-                if(accessTokenContent != null)
-                {
-                    let valor =  JSON.parse(atob(accessTokenContent));
-                    return valor;
-                }
-            }
-        }
-        return null;
-    }
+    // protected get AccessTokenContent(): any 
+    // {
+    //     if(this.oidcTokenManager != null)
+    //     {
+    //         if(this.oidcTokenManager.access_token != null)
+    //         {
+    //             let accessTokenContent = this.oidcTokenManager.access_token.split('.')[1];
+    //             if(accessTokenContent != null)
+    //             {
+    //                 let valor =  JSON.parse(atob(accessTokenContent));
+    //                 return valor;
+    //             }
+    //         }
+    //     }
+    //     return null;
+    // }
     
-    protected get IdentityToken(): string 
-    {
-        if (this.oidcTokenManager != null)
-        {
-            let id_token = this.oidcTokenManager.id_token;
-            return id_token;
-        }
-        return null;
-    }
+    // protected get IdentityToken(): string 
+    // {
+    //     if (this.oidcTokenManager != null)
+    //     {
+    //         let id_token = this.oidcTokenManager.id_token;
+    //         return id_token;
+    //     }
+    //     return null;
+    // }
 
     
-    protected get IdentityTokenContent(): any
-    {
-        if(this.oidcTokenManager != null)
-        {
-            if(this.oidcTokenManager.id_token != null)
-            {
-                let identityTokenContent = this.oidcTokenManager.id_token.split('.')[1];
-                if(identityTokenContent != null)
-                {
-                    let valor = JSON.parse(atob(identityTokenContent));
-                    return valor;
-                }
-            }
-        }
-    }
+    // protected get IdentityTokenContent(): any
+    // {
+    //     if(this.oidcTokenManager != null)
+    //     {
+    //         if(this.oidcTokenManager.id_token != null)
+    //         {
+    //             let identityTokenContent = this.oidcTokenManager.id_token.split('.')[1];
+    //             if(identityTokenContent != null)
+    //             {
+    //                 let valor = JSON.parse(atob(identityTokenContent));
+    //                 return valor;
+    //             }
+    //         }
+    //     }
+    // }
     
-    protected get ProfileContent(): any
-    {
-        if(this.oidcTokenManager != null)
-        {
-            if(this.oidcTokenManager.profile != null)
-            {
-                let valor = this.oidcTokenManager.profile;
-                return valor;
-            }
-        }
-        return null;
-    }
+    // protected get ProfileContent(): any
+    // {
+    //     if(this.oidcTokenManager != null)
+    //     {
+    //         if(this.oidcTokenManager.profile != null)
+    //         {
+    //             let valor = this.oidcTokenManager.profile;
+    //             return valor;
+    //         }
+    //     }
+    //     return null;
+    // }
 }
 
-export class TokensContents
-{
-    public get IsAuthenticated() :boolean
-    {
-        if(this.AccessTokenContent == null)
-        {
-            return false;
-        }
-        else
-        {
-            return true;
-        }
-    }
+// export class TokensContents
+// {
+//     public get IsAuthenticated() :boolean
+//     {
+//         if(this.AccessTokenContent == null)
+//         {
+//             return false;
+//         }
+//         else
+//         {
+//             return true;
+//         }
+//     }
     
-    private _profileContent: any;
-    public get ProfileContent(): any
-    {
-        return this._profileContent;
-    }
-    public set ProfileContent(value: any)
-    {
-        this._profileContent = value;
-    }
-    
-    
-    
-    private _accessToken: string;
-    public get AccessToken(): string
-    {
-        return this._accessToken;
-    }
-    public set AccessToken(value: string)
-    {
-        this._accessToken = value;
-    }
-    
-    
-    private _accessTokenContent: any;
-    public get AccessTokenContent(): any
-    {
-        return this._accessTokenContent;
-    }
-    public set AccessTokenContent(value: any)
-    {
-        this._accessTokenContent = value;
-    }
+//     private _profileContent: any;
+//     public get ProfileContent(): any
+//     {
+//         return this._profileContent;
+//     }
+//     public set ProfileContent(value: any)
+//     {
+//         this._profileContent = value;
+//     }
     
     
     
+//     private _accessToken: string;
+//     public get AccessToken(): string
+//     {
+//         return this._accessToken;
+//     }
+//     public set AccessToken(value: string)
+//     {
+//         this._accessToken = value;
+//     }
     
     
-    private _identityToken: string;
-    public get IdentityToken(): string
-    {
-        return this._identityToken;
-    }
-    public set IdentityToken(value: string)
-    {
-        this._identityToken = value;
-    }
-    
-    
-    private _identityTokenContent: any;
-    public get IdentityTokenContent(): any
-    {
-        return this._identityTokenContent;
-    }
-    public set IdentityTokenContent(value: any)
-    {
-        this._identityTokenContent = value;
-    }
+//     private _accessTokenContent: any;
+//     public get AccessTokenContent(): any
+//     {
+//         return this._accessTokenContent;
+//     }
+//     public set AccessTokenContent(value: any)
+//     {
+//         this._accessTokenContent = value;
+//     }
     
     
     
-    public tokensContentsToArray(includeEncodedTokens:boolean = true) : Array<any>
-    {
-        let tokensContents = new Array<any>();
+    
+    
+//     private _identityToken: string;
+//     public get IdentityToken(): string
+//     {
+//         return this._identityToken;
+//     }
+//     public set IdentityToken(value: string)
+//     {
+//         this._identityToken = value;
+//     }
+    
+    
+//     private _identityTokenContent: any;
+//     public get IdentityTokenContent(): any
+//     {
+//         return this._identityTokenContent;
+//     }
+//     public set IdentityTokenContent(value: any)
+//     {
+//         this._identityTokenContent = value;
+//     }
+    
+    
+    
+//     public tokensContentsToArray(includeEncodedTokens:boolean = true) : Array<any>
+//     {
+//         let tokensContents = new Array<any>();
 
-        tokensContents.push(this.IdentityTokenContent);
-        tokensContents.push(this.AccessTokenContent);
-        tokensContents.push(this.ProfileContent);
+//         tokensContents.push(this.IdentityTokenContent);
+//         tokensContents.push(this.AccessTokenContent);
+//         tokensContents.push(this.ProfileContent);
 
-        if(includeEncodedTokens)
-        {
-            let accessTokenEncoded = { 'access_token': AuthenticationContext.Current.TokensContents.AccessToken };
-            tokensContents.push(accessTokenEncoded);
+//         if(includeEncodedTokens)
+//         {
+//             let accessTokenEncoded = { 'access_token': AuthenticationContext.Current.TokensContents.AccessToken };
+//             tokensContents.push(accessTokenEncoded);
 
-            let identityTokenEncoded = { 'id_token': AuthenticationContext.Current.TokensContents.IdentityToken };
-            tokensContents.push(identityTokenEncoded); 
-        }
+//             let identityTokenEncoded = { 'id_token': AuthenticationContext.Current.TokensContents.IdentityToken };
+//             tokensContents.push(identityTokenEncoded); 
+//         }
 
-        return tokensContents;
-    }
+//         return tokensContents;
+//     }
     
-    public encodedTokensToArray() : Array<any>
-    {
-        return [ this.IdentityToken, this.AccessToken ];
-    }
-}
+//     public encodedTokensToArray() : Array<any>
+//     {
+//         return [ this.IdentityToken, this.AccessToken ];
+//     }
+// }

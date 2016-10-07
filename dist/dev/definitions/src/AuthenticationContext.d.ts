@@ -1,6 +1,6 @@
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
-import * as Q from 'q';
+import * as Oidc from 'oidc-client';
 export declare class AuthenticationContext {
     private static _current;
     private callbacksTokenObtained;
@@ -14,33 +14,11 @@ export declare class AuthenticationContext {
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
     protected Initialize(authenticationSettings: IAuthenticationSettings): void;
-    protected ProcessTokenIfNeeded(): Q.IPromise<TokensContents>;
-    Init(authenticationSettings?: IAuthenticationSettings): Q.IPromise<TokensContents>;
-    ProcessTokenCallback(): Q.IPromise<TokensContents>;
-    RenewTokenSilent(): Q.IPromise<void>;
+    protected ProcessTokenIfNeeded(): PromiseLike<Oidc.User>;
+    Init(authenticationSettings?: IAuthenticationSettings): PromiseLike<Oidc.User>;
+    ProcessTokenCallback(): PromiseLike<any>;
     protected RedirectToInitialPage(uri: string): void;
     protected ValidateInitialization(): void;
-    Login(openOnPopUp?: boolean): void;
+    Login(openOnPopUp?: boolean): PromiseLike<any>;
     IsAuthenticated: boolean;
-    TokensContents: TokensContents;
-    protected AccessToken: string;
-    protected AccessTokenContent: any;
-    protected IdentityToken: string;
-    protected IdentityTokenContent: any;
-    protected ProfileContent: any;
-}
-export declare class TokensContents {
-    IsAuthenticated: boolean;
-    private _profileContent;
-    ProfileContent: any;
-    private _accessToken;
-    AccessToken: string;
-    private _accessTokenContent;
-    AccessTokenContent: any;
-    private _identityToken;
-    IdentityToken: string;
-    private _identityTokenContent;
-    IdentityTokenContent: any;
-    tokensContentsToArray(includeEncodedTokens?: boolean): Array<any>;
-    encodedTokensToArray(): Array<any>;
 }

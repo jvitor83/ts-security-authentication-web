@@ -31,7 +31,6 @@
     "jasmine": "registry:dt/jasmine#2.5.0+20161003201800",
     "merge2": "registry:dt/merge2#0.3.6+20160316155526",
     "node": "registry:dt/node#6.0.0+20160928143418",
-    "oidc-token-manager": "registry:dt/oidc-token-manager#0.0.0+20160505172800",
     "orchestrator": "registry:dt/orchestrator#0.0.0+20160316155526",
     "q": "registry:dt/q#0.0.0+20161002164103",
     "systemjs": "registry:dt/systemjs#0.19.29+20160702105636",

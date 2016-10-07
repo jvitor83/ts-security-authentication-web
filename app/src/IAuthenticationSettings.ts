@@ -11,6 +11,8 @@ export interface IAuthenticationSettings
     max_retry_renew?: number;
     silent_renew_timeout?: number;
 
+    is_authenticated?: boolean;
+
     open_on_popup?: boolean;
 
     authorization_url? : string;
