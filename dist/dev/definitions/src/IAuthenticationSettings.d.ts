@@ -7,7 +7,6 @@ export interface IAuthenticationSettings {
     use_ietf_pattern?: boolean;
     max_retry_renew?: number;
     silent_renew_timeout?: number;
-    is_authenticated?: boolean;
     open_on_popup?: boolean;
     authorization_url?: string;
     token_url?: string;

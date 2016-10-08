@@ -144,10 +144,10 @@ export class AuthenticationContext
         
         this.oidcTokenManager = new Oidc.UserManager(this.AuthenticationManagerSettings);
 
-        this.oidcTokenManager.events.addUserLoaded(() => {
-            this.AuthenticationManagerSettings.is_authenticated = true;
-            this.AuthenticationManagerSettings = this.AuthenticationManagerSettings;
-        });
+        // this.oidcTokenManager.events.addUserLoaded(() => {
+        //     this.AuthenticationManagerSettings.is_authenticated = true;
+        //     this.AuthenticationManagerSettings = this.AuthenticationManagerSettings;
+        // });
         //Retry indefinitly for renew
         // this.oidcTokenManager.events.addSilentRenewError(() => {
         //     let count = 1;
@@ -318,43 +318,56 @@ export class AuthenticationContext
     
     public Login(openOnPopUp?: boolean) : PromiseLike<any>
     {
-        if(this.IsAuthenticated === false)
-        {
-            this.ValidateInitialization();
-            
-            //TODO: Treat when in mobile browser to not support popup
-            let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
-            
-            if (shouldOpenOnPopUp)
+
+        return this.IsAuthenticated.then((isAuthenticated) => {
+
+            if(isAuthenticated)
             {
-                return this.oidcTokenManager.signinPopup();
+                this.ValidateInitialization();
+                
+                //TODO: Treat when in mobile browser to not support popup
+                let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
+                
+                if (shouldOpenOnPopUp)
+                {
+                    return this.oidcTokenManager.signinPopup();
+                }
+                else
+                {
+                    return this.oidcTokenManager.signinRedirect();
+                }
+
             }
             else
             {
-                return this.oidcTokenManager.signinRedirect();
-            }
-        }
-        else
-        {
-            console.warn('Already authenticated');
-            return this.oidcTokenManager.getUser().then((user) => {
-                this.callbacksTokenObtained.forEach((callback) => {
-                    callback(user);
+                console.warn('Already authenticated');
+                return this.oidcTokenManager.getUser().then((user) => {
+                    this.callbacksTokenObtained.forEach((callback) => {
+                        callback(user);
+                    });
                 });
-            });
-        }
+            }
+
+        });
+        
+
     }
 
-    public get IsAuthenticated() :boolean
+    public get IsAuthenticated() :PromiseLike<boolean>
     {
-        let isAuthenticated : boolean = false;
+        return this.oidcTokenManager.getUser().then(user => user != null);
+        
+        // let isAuthenticated : boolean = false;
 
-        if(this.AuthenticationManagerSettings != null && this.AuthenticationManagerSettings.is_authenticated != null)
-        {
-            isAuthenticated = this.AuthenticationManagerSettings.is_authenticated;
-        }
+        // if(this.AuthenticationManagerSettings != null && this.AuthenticationManagerSettings.is_authenticated != null)
+        // {
+        //     isAuthenticated = this.AuthenticationManagerSettings.is_authenticated;
+        // }
 
-        return isAuthenticated;
+        // return isAuthenticated;
+
+
+
     }
 
     // public get TokensContents() : TokensContents

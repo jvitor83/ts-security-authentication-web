@@ -21,5 +21,5 @@ export declare class AuthenticationContext {
     protected RedirectToInitialPage(uri: string): void;
     protected ValidateInitialization(): void;
     Login(openOnPopUp?: boolean): PromiseLike<any>;
-    IsAuthenticated: boolean;
+    IsAuthenticated: PromiseLike<boolean>;
 }
