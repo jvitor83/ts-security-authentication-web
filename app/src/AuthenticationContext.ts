@@ -347,7 +347,18 @@ export class AuthenticationContext
 
     public get IsAuthenticated() :boolean
     {
-        return this.AuthenticationManagerSettings.is_authenticated;
+        let isAuthenticated : boolean = false;
+
+        if(this.AuthenticationManagerSettings == null)
+        {
+            isAuthenticated = false;
+        }
+        else
+        {
+            isAuthenticated = this.AuthenticationManagerSettings.is_authenticated;
+        }
+
+        return isAuthenticated;
     }
 
     // public get TokensContents() : TokensContents
