@@ -188,8 +188,7 @@ export class AuthenticationContext
     {
         if (location.href.indexOf('access_token=') > -1 && (this.oidcTokenManager.querySessionStatus() != null || location.href.indexOf('prompt=none') > -1)) {
             console.debug('Processing token! (silently)');
-            this.oidcTokenManager.signinSilentCallback();
-            console.debug('Token processed! (silently)');
+            return this.oidcTokenManager.signinSilentCallback();
         } else 
 
         //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
@@ -204,7 +203,7 @@ export class AuthenticationContext
         // {
         //     this.RenewTokenSilent();
         // }
-        //Go Horse
+        return null;
     }
     
     public Init(authenticationSettings?: IAuthenticationSettings) : PromiseLike<Oidc.User>
