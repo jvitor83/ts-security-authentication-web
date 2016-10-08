@@ -186,25 +186,33 @@ export class AuthenticationContext
 
     protected ProcessTokenIfNeeded() : PromiseLike<Oidc.User>
     {
-        if (location.href.indexOf('access_token=') > -1 && (this.oidcTokenManager.querySessionStatus() != null || location.href.indexOf('prompt=none') > -1)) {
-            console.debug('Processing token! (silently)');
-            return this.oidcTokenManager.signinSilentCallback();
-        } else 
+        return this.IsAuthenticated.then(isAuthenticated => {
 
-        //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
-        //if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
-        if(location.href.indexOf('access_token=') > -1)
-        {
-            console.debug('Processing token!');
-            return this.ProcessTokenCallback();
-        }
+            if (location.href.indexOf('access_token=') > -1 && (isAuthenticated || location.href.indexOf('prompt=none') > -1)) {
+                console.debug('Processing token! (silently)');
+                return this.oidcTokenManager.signinSilentCallback();
+            } else 
+
+            //if the actual page is the 'redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'  
+            //if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
+            if(location.href.indexOf('access_token=') > -1)
+            {
+                console.debug('Processing token!');
+                return this.ProcessTokenCallback();
+            }
+
+            let qPromise = Q.resolve(null);
+            return qPromise;
+        });
+        
+
+        
         // //if the actual page is the 'silent_redirect_uri' (loaded from the localStorage), then i consider to 'process the token callback'
         // else if (location.href.substring(0, this.AuthenticationManagerSettings.silent_redirect_uri.length) === this.AuthenticationManagerSettings.silent_redirect_uri)
         // {
         //     this.RenewTokenSilent();
         // }
-        let qPromise = Q.resolve(null);
-        return qPromise;
+
     }
     
     public Init(authenticationSettings?: IAuthenticationSettings) : PromiseLike<Oidc.User>
