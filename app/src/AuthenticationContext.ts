@@ -1,10 +1,10 @@
 /// <reference path="./oidc-client.d.ts" />
+/// <reference path="../../typings/index.d.ts" />
 
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 
-
-
+import * as Q from 'q';
 
 
 /**
@@ -203,7 +203,8 @@ export class AuthenticationContext
         // {
         //     this.RenewTokenSilent();
         // }
-        return null;
+        let qPromise = Q.resolve(null);
+        return qPromise;
     }
     
     public Init(authenticationSettings?: IAuthenticationSettings) : PromiseLike<Oidc.User>

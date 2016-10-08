@@ -1,4 +1,5 @@
 /// <reference path="oidc-client.d.ts" />
+/// <reference path="../../typings/index.d.ts" />
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 export declare class AuthenticationContext {
