@@ -1,6 +1,6 @@
+/// <reference path="oidc-client.d.ts" />
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
-import { User } from 'oidc-client';
 export declare class AuthenticationContext {
     private static _current;
     private callbacksTokenObtained;
@@ -8,14 +8,14 @@ export declare class AuthenticationContext {
     static Current: AuthenticationContext;
     IsInitialized: boolean;
     static Reset(): void;
-    AddOnTokenObtained(callback: (user: User) => void): void;
+    AddOnTokenObtained(callback: (user: Oidc.User) => void): void;
     AddOnTokenRenewFailedMaxRetry(callback: () => void): void;
     private oidcTokenManager;
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
     protected Initialize(authenticationSettings: IAuthenticationSettings): void;
-    protected ProcessTokenIfNeeded(): PromiseLike<User>;
-    Init(authenticationSettings?: IAuthenticationSettings): PromiseLike<User>;
+    protected ProcessTokenIfNeeded(): PromiseLike<Oidc.User>;
+    Init(authenticationSettings?: IAuthenticationSettings): PromiseLike<Oidc.User>;
     ProcessTokenCallback(): PromiseLike<any>;
     protected RedirectToInitialPage(uri: string): void;
     protected ValidateInitialization(): void;

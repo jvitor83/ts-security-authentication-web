@@ -1,8 +1,11 @@
+/// <reference path="./oidc-client.d.ts" />
+
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 
 
-import { UserManager, User } from 'oidc-client';
+
+
 
 /**
  * AuthenticationInitializer
@@ -12,7 +15,7 @@ export class AuthenticationContext
     
     private static _current: AuthenticationContext = null;
 
-    private callbacksTokenObtained :Array<(user: User) => void> = new Array<(user: User) => void>();
+    private callbacksTokenObtained :Array<(user: Oidc.User) => void> = new Array<(user: Oidc.User) => void>();
 
     private callbacksTokenRenewFailedRetryMax :Array<() => void> = new Array<() => void>();
 
@@ -42,7 +45,7 @@ export class AuthenticationContext
         AuthenticationContext._current = null;
     }
 
-    public AddOnTokenObtained(callback: (user: User) => void)
+    public AddOnTokenObtained(callback: (user: Oidc.User) => void)
     {
         this.callbacksTokenObtained.push(callback);
         this.oidcTokenManager.events.addUserLoaded(callback);
@@ -54,14 +57,14 @@ export class AuthenticationContext
         //this.oidcTokenManager.addOnSilentTokenRenewFailed(callback);
     }
 
-    private oidcTokenManager: UserManager;
+    private oidcTokenManager: Oidc.UserManager;
         
     constructor() 
     {
         let authenticationSettingsLoadedFromStorage = this.AuthenticationManagerSettings;
         if(authenticationSettingsLoadedFromStorage != null)
         {
-            this.oidcTokenManager = new UserManager( authenticationSettingsLoadedFromStorage );
+            this.oidcTokenManager = new Oidc.UserManager( authenticationSettingsLoadedFromStorage );
         }
     }
     
@@ -139,7 +142,7 @@ export class AuthenticationContext
             silent_renew: true,
         };
         
-        this.oidcTokenManager = new UserManager(this.AuthenticationManagerSettings);
+        this.oidcTokenManager = new Oidc.UserManager(this.AuthenticationManagerSettings);
 
         this.oidcTokenManager.events.addUserLoaded(() => {
             this.AuthenticationManagerSettings.is_authenticated = true;
@@ -181,7 +184,7 @@ export class AuthenticationContext
 
 
 
-    protected ProcessTokenIfNeeded() : PromiseLike<User>
+    protected ProcessTokenIfNeeded() : PromiseLike<Oidc.User>
     {
         if (location.href.indexOf('access_token=') > -1 && (this.oidcTokenManager.querySessionStatus() != null || location.href.indexOf('prompt=none') > -1)) {
             console.debug('Processing token! (silently)');
@@ -204,7 +207,7 @@ export class AuthenticationContext
         //Go Horse
     }
     
-    public Init(authenticationSettings?: IAuthenticationSettings) : PromiseLike<User>
+    public Init(authenticationSettings?: IAuthenticationSettings) : PromiseLike<Oidc.User>
     {
         if(authenticationSettings != null)
         {
