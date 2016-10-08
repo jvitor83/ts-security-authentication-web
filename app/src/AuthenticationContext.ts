@@ -321,7 +321,7 @@ export class AuthenticationContext
 
         return this.IsAuthenticated.then((isAuthenticated) => {
 
-            if(isAuthenticated)
+            if(isAuthenticated === false)
             {
                 this.ValidateInitialization();
                 
