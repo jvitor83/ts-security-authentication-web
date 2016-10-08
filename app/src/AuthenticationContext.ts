@@ -337,9 +337,11 @@ export class AuthenticationContext
         else
         {
             console.warn('Already authenticated');
-            // this.callbacksTokenObtained.forEach((callback) => {
-            //     callback();
-            // });
+            return this.oidcTokenManager.getUser().then((user) => {
+                this.callbacksTokenObtained.forEach((callback) => {
+                    callback(user);
+                });
+            });
         }
     }
 
