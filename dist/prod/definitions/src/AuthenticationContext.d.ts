@@ -1,5 +1,6 @@
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
+import { User } from 'oidc-client';
 export declare class AuthenticationContext {
     private static _current;
     private callbacksTokenObtained;
@@ -20,18 +21,4 @@ export declare class AuthenticationContext {
     protected ValidateInitialization(): void;
     Login(openOnPopUp?: boolean): PromiseLike<any>;
     IsAuthenticated: boolean;
-}
-export interface User {
-    id_token: string;
-    session_state: any;
-    access_token: string;
-    token_type: string;
-    scope: string;
-    profile: any;
-    expires_at: number;
-    state: any;
-    toStorageString(): string;
-    expires_in: number;
-    expired: boolean;
-    scopes: string[];
 }
