@@ -2,13 +2,6 @@ import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 
 
-//import * as Q from 'q';
-
-import * as Oidc from 'oidc-client';
-
- 
-
-
 /**
  * AuthenticationInitializer
  */
@@ -17,7 +10,7 @@ export class AuthenticationContext
     
     private static _current: AuthenticationContext = null;
 
-    private callbacksTokenObtained :Array<() => void> = new Array<() => void>();
+    private callbacksTokenObtained :Array<(user: User) => void> = new Array<(user: User) => void>();
 
     private callbacksTokenRenewFailedRetryMax :Array<() => void> = new Array<() => void>();
 
@@ -47,7 +40,7 @@ export class AuthenticationContext
         AuthenticationContext._current = null;
     }
 
-    public AddOnTokenObtained(callback: () => void)
+    public AddOnTokenObtained(callback: (user: User) => void)
     {
         this.callbacksTokenObtained.push(callback);
         this.oidcTokenManager.events.addUserLoaded(callback);
@@ -59,14 +52,14 @@ export class AuthenticationContext
         //this.oidcTokenManager.addOnSilentTokenRenewFailed(callback);
     }
 
-    private oidcTokenManager: Oidc.UserManager;
+    private oidcTokenManager: UserManager;
         
     constructor() 
     {
         let authenticationSettingsLoadedFromStorage = this.AuthenticationManagerSettings;
         if(authenticationSettingsLoadedFromStorage != null)
         {
-            this.oidcTokenManager = new Oidc.UserManager( authenticationSettingsLoadedFromStorage );
+            this.oidcTokenManager = new UserManager( authenticationSettingsLoadedFromStorage );
         }
     }
     
@@ -144,9 +137,9 @@ export class AuthenticationContext
             silent_renew: true,
         };
         
-        this.oidcTokenManager = new Oidc.UserManager(this.AuthenticationManagerSettings);
+        this.oidcTokenManager = new UserManager(this.AuthenticationManagerSettings);
 
-        this.oidcTokenManager.events.addUserLoaded((user: Oidc.UserManager) => {
+        this.oidcTokenManager.events.addUserLoaded(() => {
             this.AuthenticationManagerSettings.is_authenticated = true;
             this.AuthenticationManagerSettings = this.AuthenticationManagerSettings;
         });
@@ -186,7 +179,7 @@ export class AuthenticationContext
 
 
 
-    protected ProcessTokenIfNeeded() : PromiseLike<Oidc.User>
+    protected ProcessTokenIfNeeded() : PromiseLike<User>
     {
         if (location.href.indexOf('access_token=') > -1 && (this.oidcTokenManager.querySessionStatus() != null || location.href.indexOf('prompt=none') > -1)) {
             console.debug('Processing token! (silently)');
@@ -209,7 +202,7 @@ export class AuthenticationContext
         //Go Horse
     }
     
-    public Init(authenticationSettings?: IAuthenticationSettings) : PromiseLike<Oidc.User>
+    public Init(authenticationSettings?: IAuthenticationSettings) : PromiseLike<User>
     {
         if(authenticationSettings != null)
         {
@@ -339,9 +332,9 @@ export class AuthenticationContext
         else
         {
             console.warn('Already authenticated');
-            this.callbacksTokenObtained.forEach((callback) => {
-                callback();
-            });
+            // this.callbacksTokenObtained.forEach((callback) => {
+            //     callback();
+            // });
         }
     }
 
@@ -532,3 +525,205 @@ export class AuthenticationContext
 //         return [ this.IdentityToken, this.AccessToken ];
 //     }
 // }
+
+
+
+
+declare interface Logger  {
+    error(message?: any, ...optionalParams: any[]): void;
+    info(message?: any, ...optionalParams: any[]): void;
+    warn(message?: any, ...optionalParams: any[]): void;
+}
+declare interface AccessTokenEvents {
+
+    load(container: User): void;
+
+    unload(): void;
+
+    addAccessTokenExpiring(callback: (...ev: any[]) => void): void;
+    removeAccessTokenExpiring(callback: (...ev: any[]) => void): void;
+
+    addAccessTokenExpired(callback: (...ev: any[]) => void): void;
+    removeAccessTokenExpired(callback: (...ev: any[]) => void): void;
+}
+declare interface InMemoryWebStorage {
+    getItem(key: string): any;
+
+    setItem(key: string, value: any): any;
+
+    removeItem(key: string): any;
+
+    key(index: number): any;
+
+    length?: number;
+}
+declare class Log {
+    static NONE: number;
+    static ERROR: number;
+    static WARN: number;
+    static INFO: number;
+    // For when TypeScript 2.0 compiler is more widely used
+    // static readonly NONE: number;
+    // static readonly ERROR: number;
+    // static readonly WARN: number;
+    // static readonly INFO: number;
+
+    static reset(): void;
+
+    static level: number;
+
+    static logger: Logger;
+
+    static info(message?: any, ...optionalParams: any[]): void;
+    static warn(message?: any, ...optionalParams: any[]): void;
+    static error(message?: any, ...optionalParams: any[]): void;
+}
+
+declare interface MetadataService {
+    new (settings: OidcClientSettings): MetadataService;
+
+    getMetadata(): PromiseLike<any>;
+
+    getIssuer(): PromiseLike<any>;
+
+    getAuthorizationEndpoint(): PromiseLike<any>;
+
+    getUserInfoEndpoint(): PromiseLike<any>;
+
+    getCheckSessionIframe(): PromiseLike<any>;
+
+    getEndSessionEndpoint(): PromiseLike<any>;
+
+    getSigningKeys(): PromiseLike<any>;
+}
+declare interface MetadataServiceCtor {
+    (settings: OidcClientSettings, jsonServiceCtor?: any): MetadataService;
+}
+declare interface ResponseValidator {
+    validateSigninResponse(state: any, response: any): PromiseLike<any>;
+    validateSignoutResponse(state: any, response: any): PromiseLike<any>;
+}
+declare interface ResponseValidatorCtor {
+    (settings: OidcClientSettings, metadataServiceCtor?: MetadataServiceCtor, userInfoServiceCtor?: any): ResponseValidator;
+}
+
+declare class OidcClient {
+    constructor(settings: OidcClientSettings);
+
+    createSigninRequest(args?: any): PromiseLike<any>;
+    processSigninResponse(): PromiseLike<any>;
+
+    createSignoutRequest(args?: any): PromiseLike<any>;
+    processSignoutResponse(): PromiseLike<any>;
+
+    clearStaleState(stateStore: any): PromiseLike<any>;
+}
+
+declare interface OidcClientSettings {
+    authority?: string;
+    metadataUrl?: string;
+    metadata?: any;
+    signingKeys?: string;
+    client_id?: string;
+    response_type?: string;
+    scope?: string;
+    redirect_uri?: string;
+    post_logout_redirect_uri?: string;
+    prompt?: string;
+    display?: string;
+    max_age?: number;
+    ui_locales?: string;
+    acr_values?: string;
+    filterProtocolClaims?: boolean;
+    loadUserInfo?: boolean;
+    staleStateAge?: number;
+    clockSkew?: number;
+    stateStore?: WebStorageStateStore;
+    ResponseValidatorCtor?: ResponseValidatorCtor;
+    MetadataServiceCtor?: MetadataServiceCtor;
+}
+
+declare class UserManager extends OidcClient {
+    constructor(settings: UserManagerSettings);
+
+    clearStaleState(): PromiseLike<void>;
+
+    getUser(): PromiseLike<User>;
+    removeUser(): PromiseLike<void>;
+
+    signinPopup(args?: any): PromiseLike<User>;
+    signinPopupCallback(url?: string): PromiseLike<any>;
+
+    signinSilent(args?: any): PromiseLike<User>;
+    signinSilentCallback(url?: string): PromiseLike<any>;
+
+    signinRedirect(args?: any): PromiseLike<any>;
+    signinRedirectCallback(url?: string): PromiseLike<User>;
+
+    signoutRedirect(args?: any): PromiseLike<any>;
+    signoutRedirectCallback(url?: string): PromiseLike<any>;
+
+    querySessionStatus(args?: any): PromiseLike<any>;
+
+    events: UserManagerEvents;
+}
+declare interface UserManagerEvents extends AccessTokenEvents {
+    load(user: User): any;
+    unload(): any;
+
+    addUserLoaded(callback: (...ev: any[]) => void): void;
+    removeUserLoaded(callback: (...ev: any[]) => void): void;
+
+    addUserUnloaded(callback: (...ev: any[]) => void): void;
+    removeUserUnloaded(callback: (...ev: any[]) => void): void;
+
+    addSilentRenewError(callback: (...ev: any[]) => void): void;
+    removeSilentRenewError(callback: (...ev: any[]) => void): void;
+
+    addUserSignedOut(callback: (...ev: any[]) => void): void;
+    removeUserSignedOut(callback: (...ev: any[]) => void): void;
+}
+declare interface UserManagerSettings extends OidcClientSettings {
+    popup_redirect_uri?: string;
+    popupWindowFeatures?: string;
+    popupWindowTarget?: any;
+    silent_redirect_uri?: any;
+    automaticSilentRenew?: any;
+    accessTokenExpiringNotificationTime?: string;
+    redirectNavigator?: any;
+    popupNavigator?: any;
+    iframeNavigator?: any;
+    userStore?: any;
+}
+declare interface WebStorageStateStore {
+    set(key: string, value: any): PromiseLike<void>;
+
+    get(key: string): PromiseLike<any>;
+
+    remove(key: string): PromiseLike<any>;
+
+    getAllKeys(): PromiseLike<string[]>;
+}
+export declare interface User {
+    id_token: string;
+    session_state: any;
+    access_token: string;
+    token_type: string;
+    scope: string;
+    profile: any;
+    expires_at: number;
+    state: any;
+    toStorageString(): string;
+
+    expires_in: number;
+    expired: boolean;
+    scopes: string[];
+
+    // For when TypeScript 2.0 compiler is more widely used
+    // readonly expires_in: number;
+    // readonly expired: boolean;
+    // readonly scopes: string[];
+}
+
+
+    
