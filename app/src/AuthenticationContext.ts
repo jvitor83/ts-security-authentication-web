@@ -349,11 +349,7 @@ export class AuthenticationContext
     {
         let isAuthenticated : boolean = false;
 
-        if(this.AuthenticationManagerSettings == null)
-        {
-            isAuthenticated = false;
-        }
-        else
+        if(this.AuthenticationManagerSettings != null && this.AuthenticationManagerSettings.is_authenticated != null)
         {
             isAuthenticated = this.AuthenticationManagerSettings.is_authenticated;
         }
