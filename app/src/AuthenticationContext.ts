@@ -143,6 +143,13 @@ export class AuthenticationContext
         
         let userManagerSettings :Oidc.UserManagerSettings = this.AuthenticationManagerSettings;
 
+        if(this.AuthenticationManagerSettings.use_ietf_pattern == false && (<any>window).cordova)
+        {
+            console.log('cordova pattern');
+            userManagerSettings.popupNavigator = (<any>Oidc).CordovaPopupNavigator();
+            userManagerSettings.iframeNavigator = (<any>Oidc).CordovaIFrameNavigator();
+        }
+
         this.oidcTokenManager = new Oidc.UserManager(userManagerSettings);
 
         // this.oidcTokenManager.events.addUserLoaded(() => {
