@@ -1,11 +1,11 @@
 declare namespace Oidc {
 
-    interface Logger {
+    export interface Logger {
         error(message?: any, ...optionalParams: any[]): void;
         info(message?: any, ...optionalParams: any[]): void;
         warn(message?: any, ...optionalParams: any[]): void;
     }
-    interface AccessTokenEvents {
+    export interface AccessTokenEvents {
 
         load(container: User): void;
 
@@ -17,7 +17,7 @@ declare namespace Oidc {
         addAccessTokenExpired(callback: (...ev: any[]) => void): void;
         removeAccessTokenExpired(callback: (...ev: any[]) => void): void;
     }
-    interface InMemoryWebStorage {
+    export interface InMemoryWebStorage {
         getItem(key: string): any;
 
         setItem(key: string, value: any): any;
@@ -28,7 +28,7 @@ declare namespace Oidc {
 
         length?: number;
     }
-    class Log {
+    export class Log {
         static NONE: number;
         static ERROR: number;
         static WARN: number;
@@ -50,7 +50,7 @@ declare namespace Oidc {
         static error(message?: any, ...optionalParams: any[]): void;
     }
 
-    interface MetadataService {
+    export interface MetadataService {
         new (settings: OidcClientSettings): MetadataService;
 
         getMetadata(): PromiseLike<any>;
@@ -67,18 +67,18 @@ declare namespace Oidc {
 
         getSigningKeys(): PromiseLike<any>;
     }
-    interface MetadataServiceCtor {
+    export interface MetadataServiceCtor {
         (settings: OidcClientSettings, jsonServiceCtor?: any): MetadataService;
     }
-    interface ResponseValidator {
+    export interface ResponseValidator {
         validateSigninResponse(state: any, response: any): PromiseLike<any>;
         validateSignoutResponse(state: any, response: any): PromiseLike<any>;
     }
-    interface ResponseValidatorCtor {
+    export interface ResponseValidatorCtor {
         (settings: OidcClientSettings, metadataServiceCtor?: MetadataServiceCtor, userInfoServiceCtor?: any): ResponseValidator;
     }
 
-    class OidcClient {
+    export class OidcClient {
         constructor(settings: OidcClientSettings);
 
         createSigninRequest(args?: any): PromiseLike<any>;
@@ -90,7 +90,7 @@ declare namespace Oidc {
         clearStaleState(stateStore: any): PromiseLike<any>;
     }
 
-    interface OidcClientSettings {
+    export interface OidcClientSettings {
         authority?: string;
         metadataUrl?: string;
         metadata?: any;
@@ -114,7 +114,7 @@ declare namespace Oidc {
         MetadataServiceCtor?: MetadataServiceCtor;
     }
 
-    class UserManager extends OidcClient {
+    export class UserManager extends OidcClient {
         constructor(settings: UserManagerSettings);
 
         clearStaleState(): PromiseLike<void>;
@@ -138,7 +138,7 @@ declare namespace Oidc {
 
         events: UserManagerEvents;
     }
-    interface UserManagerEvents extends AccessTokenEvents {
+    export interface UserManagerEvents extends AccessTokenEvents {
         load(user: User): any;
         unload(): any;
 
@@ -154,7 +154,7 @@ declare namespace Oidc {
         addUserSignedOut(callback: (...ev: any[]) => void): void;
         removeUserSignedOut(callback: (...ev: any[]) => void): void;
     }
-    interface UserManagerSettings extends OidcClientSettings {
+    export interface UserManagerSettings extends OidcClientSettings {
         popup_redirect_uri?: string;
         popupWindowFeatures?: string;
         popupWindowTarget?: any;
@@ -166,7 +166,7 @@ declare namespace Oidc {
         iframeNavigator?: any;
         userStore?: any;
     }
-    interface WebStorageStateStore {
+    export interface WebStorageStateStore {
         set(key: string, value: any): PromiseLike<void>;
 
         get(key: string): PromiseLike<any>;
@@ -175,7 +175,7 @@ declare namespace Oidc {
 
         getAllKeys(): PromiseLike<string[]>;
     }
-    interface User {
+    export interface User {
         id_token: string;
         session_state: any;
         access_token: string;
