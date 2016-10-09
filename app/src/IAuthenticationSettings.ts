@@ -1,3 +1,5 @@
+import {Pattern} from './Pattern';
+
 export interface IAuthenticationSettings
 {
     authority: string;
@@ -6,7 +8,7 @@ export interface IAuthenticationSettings
     response_type?: string;
     
     client_url?: string;
-    use_ietf_pattern?: boolean;
+    pattern?: Pattern;
 
     max_retry_renew?: number;
     silent_renew_timeout?: number;

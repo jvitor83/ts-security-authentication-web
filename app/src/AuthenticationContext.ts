@@ -1,5 +1,6 @@
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
+import { Pattern } from './Pattern';
 
 import * as Q from 'q';
 
@@ -90,17 +91,14 @@ export class AuthenticationContext
             throw "Should be informed at least 'authority', 'client_id' and 'client_url'!";
         }
         
-        if(authenticationSettings.use_ietf_pattern == null)
+        if(authenticationSettings.pattern == null)
         {
-            authenticationSettings.use_ietf_pattern = true;
+            authenticationSettings.pattern = Pattern.none;
         }
 
-        if(authenticationSettings.use_ietf_pattern != null && authenticationSettings.use_ietf_pattern === true)
+        if(authenticationSettings.pattern == Pattern.ietf)
         {
-            if(authenticationSettings.client_url.indexOf('file:') > -1 || ((location.href.indexOf('file:') > -1) || location.protocol.indexOf('file') > -1))
-            {
-                authenticationSettings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
-            }
+            authenticationSettings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
         }
         
         //Set default values if not informed
@@ -143,7 +141,7 @@ export class AuthenticationContext
         
         let userManagerSettings :Oidc.UserManagerSettings = this.AuthenticationManagerSettings;
 
-        if(this.AuthenticationManagerSettings.use_ietf_pattern == false && (<any>window).cordova)
+        if(this.AuthenticationManagerSettings.pattern == Pattern.cordova)
         {
             console.log('cordova pattern');
             userManagerSettings.popupNavigator = (<any>Oidc).CordovaPopupNavigator();
