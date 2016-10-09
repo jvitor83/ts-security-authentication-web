@@ -138,11 +138,13 @@ export class AuthenticationContext
             token_url : authenticationSettings.token_url || authenticationSettings.authority + "/connect/token",
             userinfo_url: authenticationSettings.userinfo_url || authenticationSettings.authority + "/connect/userinfo",
             
-            load_user_profile: true,
-            silent_renew: true,
+            loadUserInfo: true,
+            automaticSilentRenew: true,
         };
         
-        this.oidcTokenManager = new Oidc.UserManager(this.AuthenticationManagerSettings);
+        let userManagerSettings :Oidc.UserManagerSettings = this.AuthenticationManagerSettings;
+
+        this.oidcTokenManager = new Oidc.UserManager(userManagerSettings);
 
         // this.oidcTokenManager.events.addUserLoaded(() => {
         //     this.AuthenticationManagerSettings.is_authenticated = true;
