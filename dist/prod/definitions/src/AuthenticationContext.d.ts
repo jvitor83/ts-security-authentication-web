@@ -1,7 +1,6 @@
-/// <reference path="oidc-client.d.ts" />
-/// <reference path="../../typings/index.d.ts" />
 import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings';
 import { IAuthenticationSettings } from './IAuthenticationSettings';
+import * as Oidc from 'oidc-client';
 export declare class AuthenticationContext {
     private static _current;
     private callbacksTokenObtained;
