@@ -1,4 +1,4 @@
-System.register(['./AuthenticationContext'], function(exports_1, context_1) {
+System.register(['./AuthenticationContext', './Pattern'], function(exports_1, context_1) {
     "use strict";
     var __moduleName = context_1 && context_1.id;
     function exportStar_1(m) {
@@ -12,6 +12,9 @@ System.register(['./AuthenticationContext'], function(exports_1, context_1) {
         setters:[
             function (AuthenticationContext_1_1) {
                 exportStar_1(AuthenticationContext_1_1);
+            },
+            function (Pattern_1_1) {
+                exportStar_1(Pattern_1_1);
             }],
         execute: function() {
         }
