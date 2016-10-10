@@ -146,8 +146,8 @@ export class AuthenticationContext
         if(this.AuthenticationManagerSettings.pattern == Pattern.cordova)
         {
             console.log('cordova pattern');
-            userManagerSettings.popupNavigator = (<any>Oidc).CordovaPopupNavigator();
-            userManagerSettings.iframeNavigator = (<any>Oidc).CordovaIFrameNavigator();
+            userManagerSettings.popupNavigator = new (<any>Oidc).CordovaPopupNavigator();
+            userManagerSettings.iframeNavigator = new (<any>Oidc).CordovaIFrameNavigator();
         }
 
         this.oidcTokenManager = new Oidc.UserManager(userManagerSettings);
