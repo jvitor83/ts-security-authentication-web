@@ -111,10 +111,8 @@ export class AuthenticationContext
         console.debug('Silent renew timeout setted to: ' + authenticationSettings.silent_renew_timeout + ' miliseconds');
 
 
-
-
         //Convert to the more complete IAuthenticationManagerSettings
-        this.AuthenticationManagerSettings = 
+        let settings :IAuthenticationManagerSettings = 
         {
             authority: authenticationSettings.authority,
             client_id: authenticationSettings.client_id,
@@ -141,38 +139,34 @@ export class AuthenticationContext
         };
 
 
+        console.debug('User pattern: ' + this.AuthenticationManagerSettings.pattern);
         let pattern = this.EnvironmentPattern;
         //let pattern = this.AuthenticationManagerSettings.pattern;
-        console.debug('User pattern: ' + Pattern[pattern]);
         
 
         console.debug('Environment pattern: ' + Pattern[pattern]);
 
         if(pattern == Pattern.ietf || pattern == Pattern.electron || pattern == Pattern.nativescript)
         {
-            let settings = this.AuthenticationManagerSettings;
+            console.debug('Applying ietf pattern!');
 
             settings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
-
-            this.AuthenticationManagerSettings = settings;
         }
 
         if(pattern == Pattern.cordova)
         {
-            let settings = this.AuthenticationManagerSettings;
+            console.debug('Applying cordova pattern!');
             
             settings.client_url = 'https://localhost/oidc';
             (<any>settings).popupNavigator = new (<any>Oidc).CordovaPopupNavigator();
             (<any>settings).iframeNavigator = new (<any>Oidc).CordovaIFrameNavigator();
-
-            this.AuthenticationManagerSettings = settings;
         }
 
-        console.debug('ClientUrl: ' + authenticationSettings.client_url);
+        console.debug('ClientUrl: ' + settings.client_url);
 
-        let userManagerSettings :Oidc.UserManagerSettings = this.AuthenticationManagerSettings;
+        this.AuthenticationManagerSettings = settings;
 
-        this.oidcTokenManager = new Oidc.UserManager(userManagerSettings);
+        this.oidcTokenManager = new Oidc.UserManager(settings);
 
         // this.oidcTokenManager.events.addUserLoaded(() => {
         //     this.AuthenticationManagerSettings.is_authenticated = true;
@@ -418,7 +412,7 @@ export class AuthenticationContext
                     let settings = this.AuthenticationManagerSettings;
                     settings.open_on_popup = true;
                     this.AuthenticationManagerSettings = settings;
-                    
+
                     return this.oidcTokenManager.signinPopup();
                 }
                 else
