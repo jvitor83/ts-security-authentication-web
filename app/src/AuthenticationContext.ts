@@ -141,46 +141,10 @@ export class AuthenticationContext
         };
 
 
-        let pattern = this.AuthenticationManagerSettings.pattern;
+        let pattern = this.EnvironmentPattern;
+        //let pattern = this.AuthenticationManagerSettings.pattern;
         console.debug('User pattern: ' + Pattern[pattern]);
-        if(this.AuthenticationManagerSettings.pattern == Pattern.auto)
-        {
-            let environment :any = null;
-
-            try{
-                environment = (<any>window);
-            }
-            catch(error)
-            {
-                console.debug('Should not be an environment with a window global (nativescript/node maybe?)');
-                console.debug(error);
-            }
-
-            if(environment != null)
-            {
-                if(!!environment.cordova)
-                {
-                    pattern = Pattern.cordova;
-                }
-                else if(environment && environment.process && environment.process.type)
-                {
-                    pattern = Pattern.electron;
-                }
-                else if((<Window>environment).location.href.indexOf('file:') > -1)
-                {
-                    pattern = Pattern.ietf;
-                }
-                else
-                {
-                    pattern = Pattern.none;
-                }
-            }
-            else
-            {
-                //TODO: check against node?
-                pattern = Pattern.nativescript;
-            }
-        }
+        
 
         console.debug('Environment pattern: ' + Pattern[pattern]);
 
@@ -247,7 +211,49 @@ export class AuthenticationContext
     }
     
 
+    private get EnvironmentPattern() : Pattern
+    {
+        let pattern = this.AuthenticationManagerSettings.pattern;
+        if(pattern == Pattern.auto)
+        {
+            let environment :any = null;
 
+            try{
+                environment = (<any>window);
+            }
+            catch(error)
+            {
+                console.debug('Should not be an environment with a window global (nativescript/node maybe?)');
+                console.debug(error);
+            }
+
+            if(environment != null)
+            {
+                if(!!environment.cordova)
+                {
+                    pattern = Pattern.cordova;
+                }
+                else if(environment && environment.process && environment.process.type)
+                {
+                    pattern = Pattern.electron;
+                }
+                else if((<Window>environment).location.href.indexOf('file:') > -1)
+                {
+                    pattern = Pattern.ietf;
+                }
+                else
+                {
+                    pattern = Pattern.none;
+                }
+            }
+            else
+            {
+                //TODO: check against node?
+                pattern = Pattern.nativescript;
+            }
+        }
+        return pattern;
+    }
 
 
     protected ProcessTokenIfNeeded() : PromiseLike<Oidc.User>
@@ -294,10 +300,13 @@ export class AuthenticationContext
     public ProcessTokenCallback() : PromiseLike<any>
     {
         this.ValidateInitialization();
-               
+
+        let pattern = this.EnvironmentPattern;
+
         let promise: PromiseLike<any> = null;
 
-        if(this.AuthenticationManagerSettings.open_on_popup)
+        let environmentOnlySupportPopup: boolean = (pattern == Pattern.cordova);
+        if(environmentOnlySupportPopup || this.AuthenticationManagerSettings.open_on_popup)
         {
             promise = this.oidcTokenManager.signinPopupCallback();
         }
@@ -400,10 +409,16 @@ export class AuthenticationContext
                 this.ValidateInitialization();
                 
                 //TODO: Treat when in mobile browser to not support popup
-                let shouldOpenOnPopUp = openOnPopUp || this.AuthenticationManagerSettings.open_on_popup;
+                let pattern = this.EnvironmentPattern;
+                let environmentOnlySupportPopup: boolean = (pattern == Pattern.cordova);
+                let shouldOpenOnPopUp = environmentOnlySupportPopup || (openOnPopUp || this.AuthenticationManagerSettings.open_on_popup);
                 
                 if (shouldOpenOnPopUp)
                 {
+                    let settings = this.AuthenticationManagerSettings;
+                    settings.open_on_popup = true;
+                    this.AuthenticationManagerSettings = settings;
+                    
                     return this.oidcTokenManager.signinPopup();
                 }
                 else

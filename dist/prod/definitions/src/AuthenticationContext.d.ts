@@ -14,6 +14,7 @@ export declare class AuthenticationContext {
     constructor();
     protected AuthenticationManagerSettings: IAuthenticationManagerSettings;
     protected Initialize(authenticationSettings: IAuthenticationSettings): void;
+    private EnvironmentPattern;
     protected ProcessTokenIfNeeded(): PromiseLike<Oidc.User>;
     Init(authenticationSettings?: IAuthenticationSettings): PromiseLike<Oidc.User>;
     ProcessTokenCallback(): PromiseLike<any>;
