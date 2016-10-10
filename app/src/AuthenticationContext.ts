@@ -126,6 +126,8 @@ export class AuthenticationContext
             
             response_type: authenticationSettings.response_type,
             scope: authenticationSettings.scope,
+
+            pattern: authenticationSettings.pattern,
             
             redirect_uri : authenticationSettings.client_url,
             silent_redirect_uri: authenticationSettings.client_url,
