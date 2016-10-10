@@ -96,14 +96,10 @@ export class AuthenticationContext
             authenticationSettings.pattern = Pattern.none;
         }
 
-        if(authenticationSettings.pattern == Pattern.ietf)
-        {
-            authenticationSettings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
-        }
+
         
         //Set default values if not informed
         authenticationSettings.client_url = authenticationSettings.client_url; //Self uri
-        console.debug('ClientUrl: ' + authenticationSettings.client_url);
 
         authenticationSettings.scope = authenticationSettings.scope || 'openid profile email offline_access'; //OpenId default scopes
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
@@ -113,6 +109,9 @@ export class AuthenticationContext
         console.debug('Max retry setted to: ' + authenticationSettings.max_retry_renew);
         authenticationSettings.silent_renew_timeout = authenticationSettings.silent_renew_timeout || 40 * 1000; //40 seconds to timeout
         console.debug('Silent renew timeout setted to: ' + authenticationSettings.silent_renew_timeout + ' miliseconds');
+
+
+
 
         //Convert to the more complete IAuthenticationManagerSettings
         this.AuthenticationManagerSettings = 
@@ -140,15 +139,74 @@ export class AuthenticationContext
             loadUserInfo: true,
             automaticSilentRenew: true,
         };
-        
-        let userManagerSettings :Oidc.UserManagerSettings = this.AuthenticationManagerSettings;
 
-        if(this.AuthenticationManagerSettings.pattern == Pattern.cordova)
+
+        let pattern = this.AuthenticationManagerSettings.pattern;
+        console.debug('User pattern: ' + Pattern[pattern]);
+        if(this.AuthenticationManagerSettings.pattern == Pattern.auto)
         {
-            console.log('cordova pattern');
-            userManagerSettings.popupNavigator = new (<any>Oidc).CordovaPopupNavigator();
-            userManagerSettings.iframeNavigator = new (<any>Oidc).CordovaIFrameNavigator();
+            let environment :any = null;
+
+            try{
+                environment = (<any>window);
+            }
+            catch(error)
+            {
+                console.debug('Should not be an environment with a window global (nativescript/node maybe?)');
+                console.debug(error);
+            }
+
+            if(environment != null)
+            {
+                if(!!environment.cordova)
+                {
+                    pattern = Pattern.cordova;
+                }
+                else if(environment && environment.process && environment.process.type)
+                {
+                    pattern = Pattern.electron;
+                }
+                else if((<Window>environment).location.href.indexOf('file:') > -1)
+                {
+                    pattern = Pattern.ietf;
+                }
+                else
+                {
+                    pattern = Pattern.none;
+                }
+            }
+            else
+            {
+                //TODO: check against node?
+                pattern = Pattern.nativescript;
+            }
         }
+
+        console.debug('Environment pattern: ' + Pattern[pattern]);
+
+        if(pattern == Pattern.ietf || pattern == Pattern.electron || pattern == Pattern.nativescript)
+        {
+            let settings = this.AuthenticationManagerSettings;
+
+            settings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
+
+            this.AuthenticationManagerSettings = settings;
+        }
+
+        if(pattern == Pattern.cordova)
+        {
+            let settings = this.AuthenticationManagerSettings;
+            
+            settings.client_url = 'https://localhost/oidc';
+            (<any>settings).popupNavigator = new (<any>Oidc).CordovaPopupNavigator();
+            (<any>settings).iframeNavigator = new (<any>Oidc).CordovaIFrameNavigator();
+
+            this.AuthenticationManagerSettings = settings;
+        }
+
+        console.debug('ClientUrl: ' + authenticationSettings.client_url);
+
+        let userManagerSettings :Oidc.UserManagerSettings = this.AuthenticationManagerSettings;
 
         this.oidcTokenManager = new Oidc.UserManager(userManagerSettings);
 
