@@ -139,7 +139,9 @@ export class AuthenticationContext
         };
 
 
-        console.debug('User pattern: ' + this.AuthenticationManagerSettings.pattern);
+        console.debug('User pattern: ' + settings.pattern);
+
+        this.AuthenticationManagerSettings = settings;
         let pattern = this.EnvironmentPattern;
         //let pattern = this.AuthenticationManagerSettings.pattern;
         
