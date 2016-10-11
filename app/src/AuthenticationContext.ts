@@ -139,32 +139,32 @@ export class AuthenticationContext
         };
 
 
-        console.debug('User pattern: ' + settings.pattern);
+        console.log('User pattern: ' + settings.pattern);
 
         //this.AuthenticationManagerSettings = settings;
         let pattern = AuthenticationContext.EnvironmentPattern(settings.pattern);
         //let pattern = this.AuthenticationManagerSettings.pattern;
         
 
-        console.debug('Environment pattern: ' + Pattern[pattern]);
+        console.log('Environment pattern: ' + Pattern[pattern]);
 
         if(pattern == Pattern.ietf || pattern == Pattern.electron || pattern == Pattern.nativescript)
         {
-            console.debug('Applying ietf pattern!');
+            console.log('Applying ietf pattern!');
 
             settings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
         }
 
         if(pattern == Pattern.cordova)
         {
-            console.debug('Applying cordova pattern!');
+            console.log('Applying cordova pattern!');
             
             settings.client_url = 'https://localhost/oidc';
             (<any>settings).popupNavigator = new (<any>Oidc).CordovaPopupNavigator();
             (<any>settings).iframeNavigator = new (<any>Oidc).CordovaIFrameNavigator();
         }
 
-        console.debug('ClientUrl: ' + settings.client_url);
+        console.log('ClientUrl: ' + settings.client_url);
 
         this.AuthenticationManagerSettings = settings;
 
