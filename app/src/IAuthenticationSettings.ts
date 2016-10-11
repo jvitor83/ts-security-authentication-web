@@ -10,6 +10,8 @@ export interface IAuthenticationSettings
     client_url?: string;
     pattern?: Pattern;
 
+    acr_values?: string;
+
     max_retry_renew?: number;
     silent_renew_timeout?: number;
 

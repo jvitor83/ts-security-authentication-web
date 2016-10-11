@@ -99,7 +99,7 @@ export class AuthenticationContext
 
         
         //Set default values if not informed
-        authenticationSettings.client_url = authenticationSettings.client_url; //Self uri
+        //authenticationSettings.client_url = authenticationSettings.client_url; //Self uri
 
         authenticationSettings.scope = authenticationSettings.scope || 'openid profile email offline_access'; //OpenId default scopes
         authenticationSettings.response_type = authenticationSettings.response_type || 'code id_token token'; //Hybrid flow at default
@@ -110,7 +110,7 @@ export class AuthenticationContext
         authenticationSettings.silent_renew_timeout = authenticationSettings.silent_renew_timeout || 40 * 1000; //40 seconds to timeout
         console.debug('Silent renew timeout setted to: ' + authenticationSettings.silent_renew_timeout + ' miliseconds');
 
-
+        
         //Convert to the more complete IAuthenticationManagerSettings
         let settings :IAuthenticationManagerSettings = 
         {
@@ -125,6 +125,7 @@ export class AuthenticationContext
             scope: authenticationSettings.scope,
 
             pattern: authenticationSettings.pattern,
+            acr_values: authenticationSettings.acr_values,
             
             redirect_uri : authenticationSettings.client_url,
             silent_redirect_uri: authenticationSettings.client_url,
@@ -139,7 +140,7 @@ export class AuthenticationContext
         };
 
 
-        console.log('User pattern: ' + settings.pattern);
+        console.log('User pattern: ' + Pattern[settings.pattern]);
 
         //this.AuthenticationManagerSettings = settings;
         let pattern = AuthenticationContext.EnvironmentPattern(settings.pattern);
@@ -164,11 +165,14 @@ export class AuthenticationContext
             (<any>settings).iframeNavigator = new (<any>Oidc).CordovaIFrameNavigator();
         }
 
-        console.log('ClientUrl: ' + settings.client_url);
+        
 
         this.AuthenticationManagerSettings = settings;
 
-        this.oidcTokenManager = new Oidc.UserManager(settings);
+        let oidcUserManagerSettings :Oidc.UserManagerSettings = settings;
+        
+        console.log('ClientUrl: ' + oidcUserManagerSettings.redirect_uri);
+        this.oidcTokenManager = new Oidc.UserManager(oidcUserManagerSettings);
 
         // this.oidcTokenManager.events.addUserLoaded(() => {
         //     this.AuthenticationManagerSettings.is_authenticated = true;
