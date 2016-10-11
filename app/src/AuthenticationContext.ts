@@ -2,7 +2,7 @@ import { IAuthenticationManagerSettings } from './IAuthenticationManagerSettings
 import { IAuthenticationSettings } from './IAuthenticationSettings';
 import { Pattern } from './Pattern';
 
-import * as Q from 'q';
+//import * as Q from 'q';
 
 import * as Oidc from 'oidc-client';
 
@@ -257,7 +257,7 @@ export class AuthenticationContext
         return this.IsAuthenticated.then(isAuthenticated => {
 
             if (location.href.indexOf('access_token=') > -1 && (isAuthenticated || location.href.indexOf('prompt=none') > -1)) {
-                console.debug('Processing token! (silently)');
+                console.log('Processing token! (silently)');
                 return this.oidcTokenManager.signinSilentCallback();
             } else 
 
@@ -265,12 +265,15 @@ export class AuthenticationContext
             //if(location.href.substring(0, this.AuthenticationManagerSettings.redirect_uri.length) === this.AuthenticationManagerSettings.redirect_uri)
             if(location.href.indexOf('access_token=') > -1)
             {
-                console.debug('Processing token!');
+                console.log('Processing token!');
                 return this.ProcessTokenCallback();
             }
+            else
+            {
+                return this.oidcTokenManager.getUser();
+            }
 
-            let qPromise = Q.resolve(null);
-            return qPromise;
+            
         });
         
 
@@ -432,6 +435,7 @@ export class AuthenticationContext
                     this.callbacksTokenObtained.forEach((callback) => {
                         callback(user);
                     });
+                    return user;
                 });
             }
 
