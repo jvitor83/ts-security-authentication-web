@@ -141,8 +141,8 @@ export class AuthenticationContext
 
         console.debug('User pattern: ' + settings.pattern);
 
-        this.AuthenticationManagerSettings = settings;
-        let pattern = this.EnvironmentPattern;
+        //this.AuthenticationManagerSettings = settings;
+        let pattern = AuthenticationContext.EnvironmentPattern(settings.pattern);
         //let pattern = this.AuthenticationManagerSettings.pattern;
         
 
@@ -207,9 +207,9 @@ export class AuthenticationContext
     }
     
 
-    private get EnvironmentPattern() : Pattern
+    private static EnvironmentPattern(pattern: Pattern) : Pattern
     {
-        let pattern = this.AuthenticationManagerSettings.pattern;
+        //let pattern = this.AuthenticationManagerSettings.pattern;
         if(pattern == Pattern.auto)
         {
             let environment :any = null;
@@ -297,7 +297,8 @@ export class AuthenticationContext
     {
         this.ValidateInitialization();
 
-        let pattern = this.EnvironmentPattern;
+        let settingsPattern = this.AuthenticationManagerSettings.pattern;
+        let pattern = AuthenticationContext.EnvironmentPattern(settingsPattern);
 
         let promise: PromiseLike<any> = null;
 
@@ -405,7 +406,8 @@ export class AuthenticationContext
                 this.ValidateInitialization();
                 
                 //TODO: Treat when in mobile browser to not support popup
-                let pattern = this.EnvironmentPattern;
+                let settingsPattern = this.AuthenticationManagerSettings.pattern;
+                let pattern = AuthenticationContext.EnvironmentPattern(settingsPattern);
                 let environmentOnlySupportPopup: boolean = (pattern == Pattern.cordova);
                 let shouldOpenOnPopUp = environmentOnlySupportPopup || (openOnPopUp || this.AuthenticationManagerSettings.open_on_popup);
                 
