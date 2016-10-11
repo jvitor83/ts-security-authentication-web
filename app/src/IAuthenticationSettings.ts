@@ -17,7 +17,7 @@ export interface IAuthenticationSettings
 
     open_on_popup?: boolean;
 
-    authorization_url? : string;
-    token_url? : string;
-    userinfo_url? : string;
+    // authorization_url? : string;
+    // token_url? : string;
+    // userinfo_url? : string;
 }

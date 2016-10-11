@@ -131,9 +131,9 @@ export class AuthenticationContext
             silent_redirect_uri: authenticationSettings.client_url,
             post_logout_redirect_uri: authenticationSettings.client_url,
             
-            authorization_url : authenticationSettings.authorization_url || authenticationSettings.authority + "/connect/authorize",
-            token_url : authenticationSettings.token_url || authenticationSettings.authority + "/connect/token",
-            userinfo_url: authenticationSettings.userinfo_url || authenticationSettings.authority + "/connect/userinfo",
+            // authorization_url : authenticationSettings.authorization_url || authenticationSettings.authority + "/connect/authorize",
+            // token_url : authenticationSettings.token_url || authenticationSettings.authority + "/connect/token",
+            // userinfo_url: authenticationSettings.userinfo_url || authenticationSettings.authority + "/connect/userinfo",
             
             loadUserInfo: true,
             automaticSilentRenew: true,
@@ -154,6 +154,9 @@ export class AuthenticationContext
             console.log('Applying ietf pattern!');
 
             settings.client_url = 'urn:ietf:wg:oauth:2.0:oob:auto';
+            settings.redirect_uri = settings.client_url;
+            settings.silent_redirect_uri = settings.client_url;
+            settings.post_logout_redirect_uri = settings.client_url;
         }
 
         if(pattern == Pattern.cordova)
@@ -161,6 +164,9 @@ export class AuthenticationContext
             console.log('Applying cordova pattern!');
             
             settings.client_url = 'https://localhost/oidc';
+            settings.redirect_uri = settings.client_url;
+            settings.silent_redirect_uri = settings.client_url;
+            settings.post_logout_redirect_uri = settings.client_url;
             (<any>settings).popupNavigator = new (<any>Oidc).CordovaPopupNavigator();
             (<any>settings).iframeNavigator = new (<any>Oidc).CordovaIFrameNavigator();
         }
