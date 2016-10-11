@@ -157,6 +157,8 @@ export class AuthenticationContext
             settings.redirect_uri = settings.client_url;
             settings.silent_redirect_uri = settings.client_url;
             settings.post_logout_redirect_uri = settings.client_url;
+
+            
         }
 
         if(pattern == Pattern.cordova)
@@ -167,6 +169,8 @@ export class AuthenticationContext
             settings.redirect_uri = settings.client_url;
             settings.silent_redirect_uri = settings.client_url;
             settings.post_logout_redirect_uri = settings.client_url;
+            
+            settings.open_on_popup = true;
             (<any>settings).popupNavigator = new (<any>Oidc).CordovaPopupNavigator();
             (<any>settings).iframeNavigator = new (<any>Oidc).CordovaIFrameNavigator();
         }
@@ -327,8 +331,9 @@ export class AuthenticationContext
 
         let promiseRedirect = promise
         .then(
-            () => {
-                this.RedirectToInitialPage(this.AuthenticationManagerSettings.redirect_uri);
+            (user) => {
+                //this.RedirectToInitialPage(this.AuthenticationManagerSettings.redirect_uri);
+                return user;
             },
             (error) => {
                 let message = "Problem Getting Token : " + (error.message || error);
