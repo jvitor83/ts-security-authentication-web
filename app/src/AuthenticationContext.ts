@@ -149,7 +149,7 @@ export class AuthenticationContext
 
         console.log('Environment pattern: ' + Pattern[pattern]);
 
-        if(pattern == Pattern.ietf || pattern == Pattern.electron || pattern == Pattern.nativescript)
+        if(pattern == Pattern.ietf || pattern == Pattern.nativescript)
         {
             console.log('Applying ietf pattern!');
 
@@ -157,8 +157,14 @@ export class AuthenticationContext
             settings.redirect_uri = settings.client_url;
             settings.silent_redirect_uri = settings.client_url;
             settings.post_logout_redirect_uri = settings.client_url;
+        }
 
+        if(pattern == Pattern.electron)
+        {
+            console.log('Applying electron pattern!');
             
+            (<any>settings).popupNavigator = new (<any>Oidc).ElectronPopupNavigator();
+            (<any>settings).iframeNavigator = new (<any>Oidc).ElectronIFrameNavigator();
         }
 
         if(pattern == Pattern.cordova)
