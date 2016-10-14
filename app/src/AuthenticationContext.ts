@@ -6,6 +6,13 @@ import { Pattern } from './Pattern';
 
 import * as Oidc from 'oidc-client';
 
+// declare namespace Oidc {
+//     export var User : any;
+//     export var UserManager : any;
+//     export var UserManagerSettings : any;
+// };
+
+
 
 /**
  * AuthenticationInitializer
@@ -163,6 +170,7 @@ export class AuthenticationContext
         {
             console.log('Applying electron pattern!');
             
+            settings.open_on_popup = authenticationSettings.open_on_popup || true; //Let the user force if wanted
             (<any>settings).popupNavigator = new (<any>Oidc).ElectronPopupNavigator();
             (<any>settings).iframeNavigator = new (<any>Oidc).ElectronIFrameNavigator();
         }
