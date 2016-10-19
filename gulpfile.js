@@ -16,7 +16,7 @@ var browser_sync = require('browser-sync').create();
 var del = require('del');
 
 //let tsProject = gulp_typescript.createProject('tsconfig.json');
-let moduleGeneration = 'system';
+let moduleGeneration = 'umd';
 let targetGeneration = 'es5';
 let sourcemapsInline = true;
 
